@@ -1,0 +1,532 @@
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============= MASTER TABLES (MAX 3) =============
+model User {
+  id                Int       @id @default(autoincrement())
+  email             String    @unique
+  username          String    @unique
+  password          String
+  fullName          String
+  studentId         String?   @unique
+  university        String?
+  faculty           String?
+  major             String?
+  phoneNumber       String?
+  profileImage      String?
+  isVerified        Boolean   @default(false)
+  verificationToken String?
+  resetPasswordToken String?
+  reputation        Int       @default(0)
+  isActive          Boolean   @default(true)
+  lastLoginAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  // Relations
+  items                Item[]
+  barterRequests       BarterRequest[]
+  barterNegotiations   BarterNegotiation[]
+  wishlists            Wishlist[]
+  wtbRequests          WtbRequest[]
+  wtbResponses         WtbResponse[]
+  buyerTransactions    Transaction[]     @relation("BuyerTransactions")
+  sellerTransactions   Transaction[]     @relation("SellerTransactions")
+  discussions          Discussion[]
+  comments             Comment[]
+  notifications        Notification[]
+  userBadges           UserBadge[]
+  donationRequests     DonationRequest[]
+  donationDistributions DonationDistribution[]
+  recommendations      Recommendation[]
+  academicPreferences  AcademicPreference[]
+  @@map("users")
+}
+
+model Item {
+  id                Int           @id @default(autoincrement())
+  userId            Int
+  title             String
+  description       String        @db.Text
+  price             Decimal       @db.Decimal(10, 2)
+  category          String
+  condition         ItemCondition
+  conditionDetail   String?
+  isDonation        Boolean       @default(false)
+  isBundle          Boolean       @default(false)
+  bundleItems       String?       @db.Text
+  location          String?
+  isAvailable       Boolean       @default(true)
+  viewCount         Int           @default(0)
+  favoriteCount     Int           @default(0)
+  isActive          Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  // Relations
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemImages        ItemImage[]
+  barterRequests    BarterRequest[]
+  wishlists         Wishlist[]
+  transactions      Transaction[]
+  priceHistories    PriceHistory[]
+  recommendations   Recommendation[]
+  @@index([userId])
+  @@index([category])
+  @@index([condition])
+  @@index([isDonation])
+  @@map("items")
+}
+
+model AcademicData {
+  id             Int    @id @default(autoincrement())
+  courseCode     String @unique
+  courseName     String
+  lecturerName   String?
+  faculty        String
+  semester       Int?
+  credits        Int?
+  description    String? @db.Text
+  isActive       Boolean @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  // Relations
+  discussions    Discussion[]
+  academicPreferences AcademicPreference[]
+  @@index([faculty])
+  @@index([courseCode])
+  @@map("academic_data")
+}
+
+// ============= TRANSACTION TABLES =============
+model Transaction {
+  id              Int               @id @default(autoincrement())
+  buyerId         Int
+  sellerId        Int
+  itemId          Int
+  amount          Decimal           @db.Decimal(10, 2)
+  status          TransactionStatus @default(PENDING)
+  paymentMethod   String?
+  paymentStatus   PaymentStatus     @default(UNPAID)
+  codLocation     String?
+  notes           String?           @db.Text
+  completedAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  // Relations
+  buyer           User              @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  seller          User              @relation("SellerTransactions", fields: [sellerId], references: [id])
+  item            Item              @relation(fields: [itemId], references: [id])
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([itemId])
+  @@index([status])
+  @@map("transactions")
+}
+
+model BarterRequest {
+  id                 Int                  @id @default(autoincrement())
+  requesterId        Int
+  itemOwnerId        Int
+  requestedItemId    Int
+  offeredItemIds     String               @db.Text // JSON array of item IDs
+  message            String?              @db.Text
+  status             BarterStatus         @default(PENDING)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  // Relations
+  requester          User                 @relation(fields: [requesterId], references: [id])
+  requestedItem      Item                 @relation(fields: [requestedItemId], references: [id])
+  barterNegotiations BarterNegotiation[]
+  @@index([requesterId])
+  @@index([itemOwnerId])
+  @@index([requestedItemId])
+  @@map("barter_requests")
+}
+
+model BarterNegotiation {
+  id               Int           @id @default(autoincrement())
+  barterRequestId  Int
+  senderId         Int
+  message          String        @db.Text
+  isRead           Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  // Relations
+  barterRequest    BarterRequest @relation(fields: [barterRequestId], references: [id], onDelete: Cascade)
+  sender           User          @relation(fields: [senderId], references: [id])
+  @@index([barterRequestId])
+  @@index([senderId])
+  @@map("barter_negotiations")
+}
+
+model WtbRequest {
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  title           String
+  description     String        @db.Text
+  maxPrice        Decimal?      @db.Decimal(10, 2)
+  category        String?
+  preferredCondition String?
+  location        String?
+  urgency         WtbUrgency    @default(NORMAL)
+  isActive        Boolean       @default(true)
+  expiresAt       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  // Relations
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wtbResponses    WtbResponse[]
+  @@index([userId])
+  @@index([category])
+  @@index([isActive])
+  @@map("wtb_requests")
+}
+
+model WtbResponse {
+  id            Int        @id @default(autoincrement())
+  wtbRequestId  Int
+  responderId   Int
+  message       String     @db.Text
+  offeredPrice  Decimal?   @db.Decimal(10, 2)
+  itemImages    String?    @db.Text // JSON array of image URLs
+  contactInfo   String?
+  isRead        Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  // Relations
+  wtbRequest    WtbRequest @relation(fields: [wtbRequestId], references: [id], onDelete: Cascade)
+  responder     User       @relation(fields: [responderId], references: [id])
+  @@index([wtbRequestId])
+  @@index([responderId])
+  @@map("wtb_responses")
+}
+
+model Wishlist {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  itemId    Int
+  createdAt DateTime @default(now())
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  @@unique([userId, itemId])
+  @@index([userId])
+  @@index([itemId])
+  @@map("wishlists")
+}
+
+model Discussion {
+  id               Int            @id @default(autoincrement())
+  userId           Int
+  academicDataId   Int?
+  title            String
+  content          String         @db.Text
+  category         String?
+  tags             String?        @db.Text // JSON array
+  isPinned         Boolean        @default(false)
+  isLocked         Boolean        @default(false)
+  viewCount        Int            @default(0)
+  replyCount       Int            @default(0)
+  lastReplyAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  // Relations
+  user             User           @relation(fields: [userId], references: [id])
+  academicData     AcademicData?  @relation(fields: [academicDataId], references: [id])
+  comments         Comment[]
+  @@index([userId])
+  @@index([academicDataId])
+  @@index([category])
+  @@map("discussions")
+}
+
+model Comment {
+  id           Int        @id @default(autoincrement())
+  discussionId Int
+  userId       Int
+  parentId     Int?       // For nested replies
+  content      String     @db.Text
+  isEdited     Boolean    @default(false)
+  editedAt     DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  // Relations
+  discussion   Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id])
+  parent       Comment?   @relation("CommentReplies", fields: [parentId], references: [id])
+  replies      Comment[]  @relation("CommentReplies")
+  @@index([discussionId])
+  @@index([userId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model Notification {
+  id          Int                @id @default(autoincrement())
+  userId      Int
+  type        NotificationType
+  title       String
+  message     String             @db.Text
+  relatedId   Int?               // ID of related entity (item, transaction, etc.)
+  relatedType String?            // Type of related entity
+  isRead      Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  // Relations
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([isRead])
+  @@index([type])
+  @@map("notifications")
+}
+
+model PriceHistory {
+  id        Int      @id @default(autoincrement())
+  itemId    Int
+  price     Decimal  @db.Decimal(10, 2)
+  condition ItemCondition
+  category  String
+  recordedAt DateTime @default(now())
+  // Relations
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  @@index([itemId])
+  @@index([category])
+  @@index([recordedAt])
+  @@map("price_histories")
+}
+
+model ItemImage {
+  id        Int      @id @default(autoincrement())
+  itemId    Int
+  imageUrl  String
+  isPrimary Boolean  @default(false)
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  // Relations
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  @@index([itemId])
+  @@map("item_images")
+}
+
+model CodLocation {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?  @db.Text
+  faculty     String?
+  building    String?
+  floor       String?
+  coordinates String?  // "lat,lng" format
+  imageUrl    String?
+  safetyRating Float?  @default(0)
+  accessibilityRating Float? @default(0)
+  popularityCount Int  @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([faculty])
+  @@index([building])
+  @@index([safetyRating])
+  @@map("cod_locations")
+}
+
+model UserBadge {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  badgeType   BadgeType
+  title       String
+  description String?
+  iconUrl     String?
+  earnedAt    DateTime  @default(now())
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([badgeType])
+  @@map("user_badges")
+}
+
+model DonationRequest {
+  id            Int                    @id @default(autoincrement())
+  userId        Int
+  title         String
+  description   String                 @db.Text
+  category      String?
+  urgency       DonationUrgency        @default(NORMAL)
+  status        DonationRequestStatus  @default(OPEN)
+  maxQuantity   Int?
+  receivedCount Int                    @default(0)
+  location      String?
+  contactInfo   String?
+  expiresAt     DateTime?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  // Relations
+  user                  User                   @relation(fields: [userId], references: [id])
+  donationDistributions DonationDistribution[]
+  @@index([userId])
+  @@index([category])
+  @@index([status])
+  @@map("donation_requests")
+}
+
+model DonationDistribution {
+  id                Int             @id @default(autoincrement())
+  donationRequestId Int?
+  donorId           Int
+  recipientId       Int
+  itemTitle         String
+  itemDescription   String?         @db.Text
+  quantity          Int             @default(1)
+  status            DistributionStatus @default(PENDING)
+  distributedAt     DateTime?
+  notes             String?         @db.Text
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  // Relations
+  donationRequest   DonationRequest? @relation(fields: [donationRequestId], references: [id])
+  donor             User            @relation(fields: [donorId], references: [id])
+  @@index([donationRequestId])
+  @@index([donorId])
+  @@index([recipientId])
+  @@map("donation_distributions")
+}
+
+model Recommendation {
+  id            Int                  @id @default(autoincrement())
+  userId        Int
+  itemId        Int
+  score         Float
+  reason        RecommendationReason
+  createdAt     DateTime             @default(now())
+  // Relations
+  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item          Item                 @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  @@unique([userId, itemId])
+  @@index([userId])
+  @@index([score])
+  @@map("recommendations")
+}
+
+model AcademicPreference {
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  academicDataId Int
+  priority       Int          @default(1) // 1-5 scale
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  // Relations
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  academicData   AcademicData @relation(fields: [academicDataId], references: [id])
+  @@unique([userId, academicDataId])
+  @@index([userId])
+  @@map("academic_preferences")
+}
+
+// ============= ENUMS =============
+enum ItemCondition {
+  NEW
+  LIKE_NEW
+  GOOD
+  FAIR
+  POOR
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum BarterStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum WtbUrgency {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum NotificationType {
+  ITEM_SOLD
+  ITEM_LIKED
+  BARTER_REQUEST
+  BARTER_ACCEPTED
+  BARTER_REJECTED
+  WTB_RESPONSE
+  PRICE_ALERT
+  DISCUSSION_REPLY
+  SYSTEM_ANNOUNCEMENT
+  DONATION_REQUEST
+  BADGE_EARNED
+}
+
+enum BadgeType {
+  VERIFIED_STUDENT
+  TOP_SELLER
+  HELPFUL_MEMBER
+  ACTIVE_TRADER
+  GENEROUS_DONOR
+  DISCUSSION_LEADER
+  EARLY_ADOPTER
+  TRUSTED_MEMBER
+}
+
+enum DonationUrgency {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum DonationRequestStatus {
+  OPEN
+  PARTIALLY_FULFILLED
+  FULFILLED
+  CLOSED
+  EXPIRED
+}
+
+enum DistributionStatus {
+  PENDING
+  CONFIRMED
+  DISTRIBUTED
+  CANCELLED
+}
+
+enum RecommendationReason {
+  BASED_ON_WISHLIST
+  BASED_ON_CATEGORY
+  BASED_ON_PRICE_RANGE
+  BASED_ON_LOCATION
+  BASED_ON_ACADEMIC_INTEREST
+  POPULAR_ITEM
+}
+
+
