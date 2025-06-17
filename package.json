@@ -1,14 +1,14 @@
 {
   "name": "tb_pweb",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "@prisma/client": "^6.9.0",
     "bcrypt": "^6.0.0",
@@ -18,10 +18,23 @@
     "express": "^5.1.0",
     "multer": "^2.0.1",
     "passport": "^0.7.0",
-    "prisma": "^6.9.0",
-    "tailwindcss": "^4.1.10"
+    "prisma": "^6.9.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
-  }
+    "nodemon": "^3.1.10",
+    "tailwindcss": "^4.1.10"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alfarino/tb_pweb.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alfarino/tb_pweb/issues"
+  },
+  "homepage": "https://github.com/alfarino/tb_pweb#readme",
+  "description": ""
 }
