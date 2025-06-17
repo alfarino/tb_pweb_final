@@ -1,1 +1,56 @@
- <!-- FORM UTAMA -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Halaman Utama</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-gray-800">
+
+  <!-- Navbar -->
+  <nav class="bg-green-600 p-4 text-white font-bold text-lg">
+    <div class="container mx-auto">Navbar</div>
+  </nav>
+
+  <!-- Search Bar -->
+  <div class="container mx-auto p-4 flex justify-between items-center">
+    <input type="text" placeholder="Cari sesuatu..." class="flex-grow p-2 border rounded-l">
+    <button class="bg-green-600 text-white px-4 py-2 rounded-r">Cari</button>
+  </div>
+
+  <!-- Banner -->
+  <div class="container mx-auto px-4">
+    <div class="bg-green-600 h-48 rounded shadow-lg mb-4 flex justify-center items-center text-white text-xl">
+      Banner Besar
+    </div>
+  </div>
+
+  <!-- Fitur/Kategori -->
+  <div class="container mx-auto grid grid-cols-5 gap-4 px-4 mb-4">
+    <% for (let i = 0; i < 5; i++) { %>
+      <div class="bg-green-600 h-24 rounded-lg shadow"></div>
+    <% } %>
+  </div>
+
+  <!-- Produk Grid -->
+  <div class="container mx-auto px-4 grid grid-cols-4 gap-4 mb-8">
+    <% for (let i = 0; i < 12; i++) { %>
+      <div class="bg-green-600 rounded-lg shadow">
+        <div class="h-24"></div>
+        <div class="bg-gray-200 p-2 text-center text-sm">Deskripsi Produk</div>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Footer -->
+  <div class="bg-gray-100 py-6 px-4 grid grid-cols-3 gap-4 text-sm text-center">
+    <div>Kolom 1</div>
+    <div>Kolom 2</div>
+    <div>Kolom 3</div>
+  </div>
+
+  <footer class="bg-green-600 text-white text-center py-3">
+    &copy; Kelompok 7 Pemograman Website
+  </footer>
+
+</body>
+</html>
