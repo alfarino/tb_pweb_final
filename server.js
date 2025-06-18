@@ -3,7 +3,9 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
-const itemRoutes = require('./routes/itemRoutes'); // ✅ ditambahkan
+const itemRoutes = require('./routes/itemRoutes'); 
+const indexRoutes = require('./routes/indexRoutes');
+app.use('/', indexRoutes);
 
 const users = [
   { username: 'admin', password: '1234' }
