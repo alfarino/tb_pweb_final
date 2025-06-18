@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^6.9.0",
+    "@prisma/client": "^6.10.0",
     "@tailwindcss/cli": "^4.1.10",
     "bcrypt": "^6.0.0",
     "daisyui": "^5.0.43",

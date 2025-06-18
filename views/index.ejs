@@ -24,13 +24,20 @@
 
   <!-- Produk Grid -->
   <div class="container mx-auto px-4 grid grid-cols-8 gap-4 mb-8">
-    <% for (let i = 0; i < 16; i++) { %>
-      <a href="/produk/<%= i %>" class="block bg-green-600 rounded-lg shadow hover:shadow-xl hover:-translate-y-1 transition duration-300">
-        <div class="h-48"></div>
-        <div class="bg-gray-200 p-2 text-center text-sm">Nama Produk</div>
+    <% items.forEach(item => { %>
+      <a href="/items/<%= item.id %>" class="block bg-green-600 rounded-lg shadow hover:shadow-xl hover:-translate-y-1 transition duration-300">
+        <div class="h-48 bg-white flex items-center justify-center text-gray-700">
+          <% if (item.itemImages.length > 0) { %>
+            <img src="<%= item.itemImages[0].url %>" class="h-full object-cover rounded" />
+          <% } else { %>
+            <span class="text-sm text-gray-400">No Image</span>
+          <% } %>
+        </div>
+        <div class="bg-gray-200 p-2 text-center text-sm font-semibold"><%= item.title %></div>
       </a>
-    <% } %>
+    <% }) %>
   </div>
+
 
 
   <%- include('layout/footer') %>
