@@ -16,25 +16,25 @@
 
   <!-- Banner -->
   <div class="container mx-auto px-4">
-    <div class="bg-green-600 h-48 rounded shadow-lg mb-4 flex justify-center items-center text-white text-xl">
+    <div class="bg-green-600 h-96 rounded shadow-lg mb-4 flex justify-center items-center text-white text-xl">
       Banner Besar
     </div>
   </div>
 
   <!-- Fitur/Kategori -->
-  <div class="container mx-auto grid grid-cols-5 gap-4 px-4 mb-4">
-    <% for (let i = 0; i < 5; i++) { %>
-      <div class="bg-green-600 h-24 rounded-lg shadow"></div>
+  <div class="container mx-auto grid grid-cols-7 gap-4 px-4 mb-4">
+    <% for (let i = 0; i < 7; i++) { %>
+      <div class="bg-green-600 h-16 rounded-lg shadow"></div>
     <% } %>
   </div>
 
   <!-- Produk Grid -->
-  <div class="container mx-auto px-4 grid grid-cols-4 gap-4 mb-8">
-    <% for (let i = 0; i < 12; i++) { %>
-      <div class="bg-green-600 rounded-lg shadow">
-        <div class="h-24"></div>
-        <div class="bg-gray-200 p-2 text-center text-sm">Deskripsi Produk</div>
-      </div>
+  <div class="container mx-auto px-4 grid grid-cols-8 gap-4 mb-8">
+    <% for (let i = 0; i < 16; i++) { %>
+      <a href="/produk/<%= i %>" class="block bg-green-600 rounded-lg shadow hover:shadow-xl hover:-translate-y-1 transition duration-300">
+        <div class="h-48"></div>
+        <div class="bg-gray-200 p-2 text-center text-sm">Nama Produk</div>
+      </a>
     <% } %>
   </div>
 
