@@ -1,11 +1,34 @@
+
   <!-- Navbar -->
-  <nav class="bg-green-600 p-4 text-white font-bold text-lg">
-    <div class="container mx-auto flex justify-between">
-    <div class="text-lg font-bold">Logo</div>
-    <ul class="flex space-x-4">
-      <li><a href="/" class="hover:underline">Home</a></li>
-      <li><a href="/produk" class="hover:underline">Produk</a></li>
-      <li><a href="/kontak" class="hover:underline">Kontak</a></li>
-    </ul>
+  <nav class="bg-green-600 text-white px-6 flex justify-between items-center">
+    <!-- Logo -->
+    <div class="font-bold text-lg">Logo</div>
+
+    <!-- Menu dan Profil -->
+    <div class="flex items-center space-x-4">
+    <!-- Menu -->
+    <a href="/" class="px-4 py-2 rounded hover:bg-green-800 bg-white text-green-600 hover:text-white font-semibold transition">Home</a>
+    <a href="/produk" class="px-4 py-2 rounded hover:bg-green-800 bg-white text-green-600 hover:text-white font-semibold transition">Produk</a>
+    <a href="/kontak" class="px-4 py-2 rounded hover:bg-green-800 bg-white text-green-600 hover:text-white font-semibold transition">Kontak</a>
+
+    <!-- Foto Profil -->
+    <div class="relative top-3">
+      <button id="profileBtn" class="focus:outline-none">
+        <img src="/images/profil.jpg" alt="Foto Profil" class="w-9 h-9 rounded-full border-2 border-white shadow-md hover:scale-110 transition" />
+      </button>
+
+      <!-- Dropdown Menu -->
+      <div id="dropdownMenu" class="hidden absolute -right-1 -mt-1 w-48 bg-white text-black rounded shadow-lg z-50">
+        <!-- Arrow -->
+        <div class="absolute -top-2 right-3 w-4 h-4 bg-white rotate-45 shadow-sm"></div>
+        
+        <a href="/profil" class="block px-4 py-2 rounded hover:bg-gray-100">Profil Saya</a>
+        <a href="/pengaturan" class="block px-4 py-2 hover:bg-gray-100">Produk Saya</a>
+        <a href="/riwayat" class="block px-4 py-2 hover:bg-gray-100">Riwayat</a>
+        <a href="/logout" class="block px-4 py-2 rounded hover:bg-gray-100">Keluar</a>
+      </div>
+    </div>
   </div>
-  </nav>
+</nav>
+
+<script src="/js/navbar.js"></script>
