@@ -1,0 +1,76 @@
+<!-- views/items/detail.ejs -->
+<%
+  function translateCondition(condition) {
+    switch (condition) {
+      case 'NEW': return 'Baru';
+      case 'LIKE_NEW': return 'Seperti Baru';
+      case 'GOOD': return 'Bagus';
+      case 'FAIR': return 'Cukup';
+      case 'POOR': return 'Kurang';
+      default: return '-';
+    }
+  }
+
+  function conditionColor(cond) {
+    switch (cond) {
+      case 'NEW': return 'text-green-600';
+      case 'LIKE_NEW': return 'text-blue-600';
+      case 'GOOD': return 'text-yellow-600';
+      case 'FAIR': return 'text-orange-600';
+      case 'POOR': return 'text-red-600';
+      default: return 'text-gray-600';
+    }
+  }
+%>
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title><%= item.title %> - E-Danus</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+
+<div class="max-w-6xl mx-auto p-6">
+  <div class="flex gap-6">
+    <!-- Gambar -->
+    <div class="w-96">
+      <div class="bg-white p-4 rounded shadow">
+        <% if (item.itemImages && item.itemImages.length > 0) { %>
+          <img src="<%= item.itemImages[0].url %>" class="w-full h-96 object-cover rounded mb-4" />
+        <% } else { %>
+          <div class="w-full h-96 bg-gray-200 rounded flex items-center justify-center text-gray-500">No Image</div>
+        <% } %>
+        <div class="flex gap-2">
+          <% (item.itemImages || []).forEach((img, i) => { %>
+            <img src="<%= img.url || '/images/placeholders/image.png' %>" class="w-16 h-16 object-cover rounded border <%= i === 0 ? 'border-green-600' : 'border-gray-300' %>">
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail -->
+    <div class="flex-1 bg-white p-6 rounded shadow">
+      <h1 class="text-2xl font-bold mb-2"><%= item.title %></h1>
+      <p class="text-gray-600 mb-4"><%= item.description %></p>
+      <div class="text-3xl font-bold text-green-600 mb-2">Rp<%= Number(item.price).toLocaleString('id-ID') %></div>
+      
+      <% if (item.priceHistories && item.priceHistories.length > 0) { %>
+        <div class="text-sm text-gray-500 line-through">
+          Rp<%= Number(item.priceHistories[item.priceHistories.length - 1].price).toLocaleString('id-ID') %>
+        </div>
+      <% } %>
+
+      <div class="mt-4 text-sm space-y-2">
+        <p><strong>Kondisi:</strong> <span class="<%= conditionColor(item.condition) %>"><%= translateCondition(item.condition) %></span></p>
+        <p><strong>Etalase:</strong> <%= item.category %></p>
+        <p><strong>Lokasi:</strong> <%= item.location || '-' %></p>
+        <p><strong>Jumlah Dilihat:</strong> <%= item.viewCount %></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
