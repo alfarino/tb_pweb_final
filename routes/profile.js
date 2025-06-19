@@ -8,4 +8,6 @@ router.get('/edit-profile', (req, res) => {
 
 router.get('/product', itemController.getUserProducts);
 
+router.get('/main-profile', itemController.getUserProfile);
+
 module.exports = router;
