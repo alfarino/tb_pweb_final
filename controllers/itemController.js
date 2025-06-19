@@ -51,19 +51,20 @@ exports.getUserProducts = async (req, res) => {
     const produk = items.map(item => ({
       id: item.id,
       title: item.title,
-      price: parseFloat(item.price), // konversi Decimal ke float
+      price: parseFloat(item.price),
       status: item.status,
-      imageUrl: item.itemImages[0]?.imageUrl || 'default.jpg'
+      imageUrl: item.itemImages[0] ? `/uploads/items/${item.itemImages[0].imageUrl}` : null
     }));
 
     res.render('profile/product', {
       produk,
-      user: req.session.user // tambahan agar bisa pakai nama pemilik akun di EJS
+      user: req.session.user
     });
   } catch (error) {
     console.error('[getUserProducts] Error:', error);
     res.status(500).send('Gagal mengambil produk');
   }
 };
+
 
 

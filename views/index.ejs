@@ -28,7 +28,7 @@
     <a href="/items/<%= item.id %>" class="block bg-white rounded-lg shadow hover:shadow-xl hover:-translate-y-1 transition duration-300 overflow-hidden">
       <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
         <% if (item.itemImages && item.itemImages.length > 0) { %>
-          <img src="<%= item.itemImages[0]?.imageUrl %>" class="w-full h-full object-cover" />
+         <img src="/<%= item.itemImages[0]?.imageUrl %>" class="w-full h-full object-cover" /> 
         <% } else { %>
           <span class="text-gray-400 text-sm">No Image</span>
         <% } %>

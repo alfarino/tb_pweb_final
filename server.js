@@ -1,30 +1,27 @@
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
-const ejs = require("ejs");
 
 const app = express();
 const PORT = 3000;
 
-// Prisma client
+// ✅ Prisma Client
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 // ✅ View Engine Setup
-app.engine("ejs", (filePath, options, callback) => {
-  options.filename = filePath;
-  ejs.renderFile(filePath, options, callback);
-});
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // ✅ Static Files Middleware
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Menyediakan akses langsung ke file di folder /public
 app.use(express.static(path.join(__dirname, "public")));
+
+// ✅ Body Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Session Config
+// ✅ Session Configuration
 app.use(session({
   secret: 'rahasia-kuat-123',
   resave: false,
@@ -45,7 +42,7 @@ const profileRouter = require("./routes/profile");
 
 // ✅ Gunakan Routes
 app.use("/items", itemRoutes);
-app.use("/profile", profileRouter);
+app.use("/profile", requireLogin, profileRouter); // Proteksi semua route profile
 
 // ✅ Login Routes
 app.get("/login", (req, res) => {
