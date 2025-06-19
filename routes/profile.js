@@ -8,7 +8,4 @@ router.get('/edit-profile', (req, res) => {
 
 router.get('/product', itemController.getUserProducts);
 
-router.get('/history-buy', itemController.getRiwayatPembelian);
-
-
 module.exports = router;
