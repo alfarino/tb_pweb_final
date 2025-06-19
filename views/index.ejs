@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>Halaman Utama</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-white text-gray-800">
+=======
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,23 +14,23 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-black-500 text-gray-800">
+>>>>>>> d3400effc97e5962f59c3dd7382aa0e66b17ecf3
 
+    <%- include('layout/navbar') %>
 
-  <%- include('layout/navbar') %>
-
-  <!-- Banner -->
-  <div class="container mx-auto px-4 mt-5">
-    <div class="bg-green-600 h-96 rounded shadow-lg mb-4 flex justify-center items-center text-white text-xl">
-      Banner Besar
+    <!-- Banner -->
+    <div class="container mx-auto px-4 mt-5">
+      <div class="bg-green-600 h-96 rounded shadow-lg mb-4 flex justify-center items-center text-white text-xl">
+        Banner Besar
+      </div>
     </div>
-  </div>
 
-  <!-- Fitur/Kategori -->
-  <div class="container mx-auto grid grid-cols-7 gap-4 px-4 mb-4">
-    <% for (let i = 0; i < 7; i++) { %>
-      <div class="bg-green-600 h-16 rounded-lg shadow"></div>
-    <% } %>
-  </div>
+    <!-- Fitur/Kategori -->
+    <div class="container mx-auto grid grid-cols-7 gap-4 px-4 mb-4">
+      <% for (let i = 0; i < 7; i++) { %>
+        <div class="bg-green-600 h-16 rounded-lg shadow"></div>
+      <% } %>
+    </div>
 
   <!-- Produk Grid -->
   <div class="container mx-auto grid grid-cols-7 gap-4 px-4 mb-4">
@@ -29,20 +38,21 @@
       <a href="/items/<%= item.id %>" class="block bg-white rounded-lg shadow hover:shadow-xl hover:-translate-y-1 transition duration-300 overflow-hidden">
         <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
           <% if (item.itemImages && item.itemImages.length > 0) { %>
-            <img src="<%= item.itemImages[0]?.imageUrl %>" class="w-full h-full object-cover" />
+            <img src="<%= item.itemImages[0]?.url %>" class="w-full h-full object-cover" />
           <% } else { %>
             <span class="text-gray-400 text-sm">No Image</span>
           <% } %>
         </div>
 
-        <div class="bg-gray-100 p-2 text-center text-sm font-semibold truncate">
-          <%= item.title %>
-        </div>
-      </a>
-    <% }) %>
-  </div>
+            <div class="bg-gray-100 p-2 text-center text-sm font-semibold truncate">
+              <%= item.title %>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    <% } %>
 
 
-  <%- include('layout/footer') %>
+    <%- include('layout/footer') %>
   </body>
-  </html>
+</html>

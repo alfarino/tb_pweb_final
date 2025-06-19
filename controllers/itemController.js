@@ -20,3 +20,31 @@ exports.getItemDetail = async (req, res) => {
     res.status(500).render('errors/500', { message: 'Server error' });
   }
 };
+
+exports.getItemList = async (req, res) => {
+  try {
+    const items = await prisma.item.findMany({
+      include: { itemImages: true }
+    });
+
+    res.render('index', { items });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('errors/500', { message: 'Server error' });
+  }
+};
+
+exports.getUserProducts = async (req, res) => {
+  try {
+    const produk = await prisma.item.findMany({
+      where: {
+        userId: 1 // ganti dengan userId yang login (nanti bisa pakai req.session.user.id)
+      }
+    });
+
+    res.render('profile/product', { produk });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Gagal mengambil produk');
+  }
+};

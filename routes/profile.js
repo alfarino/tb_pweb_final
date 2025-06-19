@@ -1,9 +1,11 @@
-// routes/itemRoutes.js
 const express = require('express');
 const router = express.Router();
 const itemController = require('../controllers/itemController');
 
-router.get('/:id', itemController.getItemDetail);
-router.get('/', itemController.getItemList);
+router.get('/edit-profile', (req, res) => {
+  res.render('profile/edit-profile');
+});
+
+router.get('/product', itemController.getUserProducts);
 
 module.exports = router;
