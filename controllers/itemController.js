@@ -36,15 +36,34 @@ exports.getItemList = async (req, res) => {
 
 exports.getUserProducts = async (req, res) => {
   try {
-    const produk = await prisma.item.findMany({
+    const items = await prisma.item.findMany({
       where: {
-        userId: 1 // ganti dengan userId yang login (nanti bisa pakai req.session.user.id)
+        userId: req.session.user.id
+      },
+      include: {
+        itemImages: {
+          where: { isPrimary: true },
+          take: 1
+        }
       }
     });
 
-    res.render('profile/product', { produk });
+    const produk = items.map(item => ({
+      id: item.id,
+      title: item.title,
+      price: parseFloat(item.price), // konversi Decimal ke float
+      status: item.status,
+      imageUrl: item.itemImages[0]?.imageUrl || 'default.jpg'
+    }));
+
+    res.render('profile/product', {
+      produk,
+      user: req.session.user // tambahan agar bisa pakai nama pemilik akun di EJS
+    });
   } catch (error) {
-    console.error(error);
+    console.error('[getUserProducts] Error:', error);
     res.status(500).send('Gagal mengambil produk');
   }
 };
+
+

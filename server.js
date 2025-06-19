@@ -10,15 +10,16 @@ const PORT = 3000;
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// ✅ Middleware View Engine
+// ✅ View Engine Setup
 app.engine("ejs", (filePath, options, callback) => {
-  options.filename = filePath; // agar include('layout/navbar') sukses
+  options.filename = filePath;
   ejs.renderFile(filePath, options, callback);
 });
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// ✅ Middleware Umum
+// ✅ Static Files Middleware
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,18 +39,19 @@ function requireLogin(req, res, next) {
   next();
 }
 
-// ✅ Route Modules
+// ✅ Import Routes
 const itemRoutes = require("./routes/itemRoutes");
 const profileRouter = require("./routes/profile");
+
+// ✅ Gunakan Routes
 app.use("/items", itemRoutes);
 app.use("/profile", profileRouter);
 
-// ✅ Login Page
+// ✅ Login Routes
 app.get("/login", (req, res) => {
   res.render("auth/login", { error: null });
 });
 
-// ✅ Login Handler
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -62,7 +64,7 @@ app.post("/login", async (req, res) => {
       return res.render("auth/login", { error: "Username atau password salah!" });
     }
 
-    // Simpan session user
+    // Simpan data user ke dalam session
     req.session.user = {
       id: user.id,
       username: user.username,
@@ -76,14 +78,14 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// ✅ Logout
+// ✅ Logout Route
 app.get("/logout", (req, res) => {
   req.session.destroy(() => {
     res.redirect("/login");
   });
 });
 
-// ✅ Halaman Utama (beranda)
+// ✅ Beranda (Home)
 const itemController = require("./controllers/itemController");
 app.get("/", requireLogin, itemController.getItemList);
 
