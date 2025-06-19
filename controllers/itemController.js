@@ -68,3 +68,24 @@ exports.getUserProducts = async (req, res) => {
 
 
 
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    const userId = 1; // Ganti dengan ID yang benar, bisa dari session nanti
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId }, 
+    });
+
+    if (!user) {
+      return res.status(404).render('errors/404', { message: 'User tidak ditemukan' });
+    }
+
+    res.render('profile/main-profile', { user });
+
+  } catch (error) {
+    console.error('Gagal mengambil data user:', error);
+    res.status(500).render('errors/500', { message: 'Terjadi kesalahan server' });
+  }
+};
+
