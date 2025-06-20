@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Keranjang Belanja</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex flex-col min-h-screen bg-white">
+  <%- include('../layout/navbar') %>
+
+  <main class="flex-1 max-w-6xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6">Keranjang Belanja</h1>
+
+    <table class="w-full text-left shadow rounded-lg overflow-hidden">
+      <thead class="bg-gray-100 text-gray-700 font-semibold">
+        <tr>
+          <th class="px-4 py-3">Produk</th>
+          <th class="px-4 py-3">Harga satuan</th>
+          <th class="px-4 py-3">Kuantitas</th>
+          <th class="px-4 py-3">Total Harga</th>
+          <th class="px-4 py-3">Aksi</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <% if (carts.length === 0) { %>
+          <tr>
+            <td colspan="5" class="text-center p-6 text-gray-500">Keranjang kosong.</td>
+          </tr>
+        <% } else { %>
+          <% carts.forEach(cart => { %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-4 flex items-center space-x-4">
+                <div class="w-16 h-16 bg-gray-200 rounded overflow-hidden flex items-center justify-center">
+                  <% if (cart.item.itemImages && cart.item.itemImages.length > 0) { %>
+                    <img src="/uploads/items/<%= cart.item.itemImages[0].imageUrl %>" class="w-full h-full object-cover" />
+                  <% } else { %>
+                    <span class="text-gray-400">📷</span>
+                  <% } %>
+                </div>
+                <div>
+                  <div class="font-semibold"><%= cart.item.title %></div>
+                  <div class="text-sm text-gray-500">(Header)</div>
+                </div>
+              </td>
+              <td class="px-4 py-4">Rp <%= Number(cart.item.price).toLocaleString('id-ID') %></td>
+              <td class="px-4 py-4">
+                <form action="/keranjang/update/<%= cart.id %>" method="POST" class="flex items-center space-x-1">
+                  <button type="submit" name="action" value="decrease" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">−</button>
+                  <input type="text" name="quantity" value="<%= cart.quantity %>" readonly class="w-10 text-center border rounded" />
+                  <button type="submit" name="action" value="increase" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">+</button>
+                </form>
+              </td>
+              <td class="px-4 py-4 font-semibold">
+                Rp <%= Number(cart.item.price * cart.quantity).toLocaleString('id-ID') %>
+              </td>
+              <td class="px-4 py-4">
+                <form action="/keranjang/delete/<%= cart.id %>" method="POST" onsubmit="return confirm('Yakin ingin menghapus item ini?')">
+                  <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">HAPUS</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+
+    <% if (carts.length > 0) { %>
+      <div class="mt-6 flex justify-end">
+        <a href="/checkout" class="bg-green-500 text-white px-6 py-3 rounded-full hover:bg-green-600 transition">Checkout</a>
+      </div>
+    <% } %>
+  </main>
+
+  <%- include('../layout/footer') %>
+</body>
+</html>
