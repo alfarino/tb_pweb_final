@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Want to Buy</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen"> <!-- Menambahkan flexbox dan min-h-screen -->
+
+  <!-- Navbar -->
+  <%- include('layout/navbar') %>
+
+  <div class="container mx-auto mt-10 px-4 flex-grow">
+    <h1 class="text-3xl font-bold text-center mb-6">Mau cari apa?</h1>
+
+    <!-- Jika tidak ada produk -->
+    <% if (products.length === 0) { %>
+      <div class="text-center p-6 border rounded-lg bg-white shadow-md">
+        <h2 class="text-xl font-semibold">Belum ada produk</h2>
+        <p>Segera tambahkan produk untuk memulai.</p>
+      </div>
+    <% } else { %>
+      <!-- Jika ada produk, tampilkan produk dalam grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% products.forEach(product => { %>
+          <div class="bg-white p-4 rounded-lg shadow-md">
+            <div class="h-48 bg-gray-200 mb-4"></div>
+            <h3 class="font-semibold text-lg mb-2"><%= product.name %></h3>
+            <p class="text-gray-500 mb-2"><%= product.description %></p>
+            <div class="flex justify-between items-center">
+              <button class="bg-blue-500 text-white px-4 py-2 rounded">Beli</button>
+              <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded">Detail</button>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Tombol Tambah di Kanan Bawah -->
+  <a href="/add-item" class="fixed bottom-6 right-6 bg-green-600 text-white p-6 rounded-full shadow-lg hover:bg-green-700 transition duration-300 text-3xl flex justify-center items-center">
+    +
+  </a>
+
+  <!-- Footer yang selalu di bawah -->
+  <%- include('layout/footer') %>
+
+</body>
+</html>

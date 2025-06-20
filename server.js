@@ -12,9 +12,7 @@ const prisma = new PrismaClient();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-
 // ✅ Static Files Middleware
-// Menyediakan akses langsung ke file di folder /public
 app.use(express.static(path.join(__dirname, "public")));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // untuk gambar
 
@@ -29,18 +27,19 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-// ✅ Middleware Proteksi Login
+// ✅ Middleware untuk memastikan pengguna sudah login
 function requireLogin(req, res, next) {
   if (!req.session.user) {
-    return res.redirect("/login");
+    return res.redirect("/login");  // Jika belum login, arahkan ke halaman login
   }
-  next();
+  next();  // Jika sudah login, lanjutkan ke route berikutnya
 }
 
 // ✅ Import Routes
 const itemRoutes = require("./routes/itemRoutes");
 const profileRouter = require("./routes/profileRoutes");
 const cartRoutes = require('./routes/keranjangRoutes');
+const wtbRoutes = require("./routes/wtbRoutes");  // Mengimpor route untuk halaman "Want to Buy"
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
@@ -51,7 +50,7 @@ app.use((req, res, next) => {
 app.use("/items", itemRoutes);
 app.use('/keranjang', requireLogin, cartRoutes);
 app.use("/profile", requireLogin, profileRouter); // Proteksi semua route profile
-
+app.use("/want-to-buy", requireLogin, wtbRoutes);  // Menambahkan route untuk halaman "Want to Buy"
 
 // ✅ Login Routes
 app.get("/login", (req, res) => {
