@@ -37,7 +37,7 @@ function requireLogin(req, res, next) {
 
 // ✅ Import Routes
 const itemRoutes = require("./routes/itemRoutes");
-const profileRouter = require("./routes/profileRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 const cartRoutes = require('./routes/keranjangRoutes');
 const wtbRoutes = require("./routes/wtbRoutes");  // Mengimpor route untuk halaman "Want to Buy"
 
@@ -49,7 +49,7 @@ app.use((req, res, next) => {
 // ✅ Gunakan Routes
 app.use("/items", requireLogin, itemRoutes);
 app.use('/keranjang', requireLogin, cartRoutes);
-app.use("/profile", requireLogin, profileRouter); // Proteksi semua route profile
+app.use("/profile", requireLogin, profileRoutes); // Proteksi semua route profile
 app.use("/want-to-buy", requireLogin, wtbRoutes);  // Menambahkan route untuk halaman "Want to Buy"
 
 // ✅ Login Routes
