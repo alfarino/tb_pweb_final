@@ -13,8 +13,19 @@ exports.getItemDetail = async (req, res) => {
       return res.status(404).render('errors/404', { message: 'Item tidak ditemukan' });
     }
 
+    const produkLainnya = await prisma.item.findMany({
+      where: { id: { not: itemId } },
+      include: {
+        itemImages: {
+          where: { isPrimary: true },
+          take: 1
+        }
+      },
+      take: 6 // batasi jumlah produk lainnya
+    });
+
     // kirim data ke file EJS views/items/detail.ejs
-    res.render('items/detail', { item });
+    res.render('items/detail', { item, items: produkLainnya });
   } catch (error) {
     console.error(error);
     res.status(500).render('errors/500', { message: 'Server error' });

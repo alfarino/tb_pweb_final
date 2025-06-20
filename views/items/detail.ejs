@@ -1,12 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title><%= item.title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="p-6 bg-gray-50">
-  <h1 class="text-2xl font-bold"><%= item.title %></h1>
-  <p class="text-gray-700"><%= item.description %></p>
-  <p class="text-lg font-semibold text-green-600">Rp<%= Number(item.price).toLocaleString('id-ID') %></p>
+<body class="flex flex-col min-h-screen bg-white">
+
+    <%- include('../layout/navbar') %>
+
+  <!-- Konten Utama -->
+  <main class="flex-1 p-6 max-w-6xl mx-auto">
+
+    <!-- Produk -->
+    <div class="bg-gray-100 p-6 rounded-lg shadow mb-10">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Gambar & User -->
+        <div>
+          <div class="flex items-center space-x-2 mb-4">
+            <div class="w-8 h-8 bg-gray-300 text-white rounded-full flex items-center justify-center text-sm font-bold">OP</div>
+            <span class="text-sm text-gray-600">(Header)</span>
+          </div>
+          <div class="bg-gray-400 h-64 md:h-80 flex items-center justify-center text-white rounded">
+            <span class="text-2xl">📷</span>
+          </div>
+        </div>
+
+        <!-- Info Produk -->
+        <div class="flex flex-col justify-center">
+          <h1 class="text-2xl font-bold mb-2"><%= item.title %></h1>
+          <p class="text-xl text-green-600 font-semibold mb-4">Rp <%= Number(item.price).toLocaleString('id-ID') %></p>
+
+          <!-- Deskripsi Besar -->
+          <div class="border rounded p-4 bg-white text-gray-700 leading-relaxed mb-4 h-48 overflow-y-auto">
+            <%= item.description %>
+          </div>
+
+          <div class="flex space-x-4">
+            <button class="bg-green-200 text-green-800 px-4 py-2 rounded-full hover:bg-green-300 transition">Masukkan Keranjang</button>
+            <button class="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- Produk Lainnya -->
+  <section>
+  <h2 class="text-xl font-semibold mb-4">Lainnya</h2>
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    <% items.forEach(item => { %>
+      <a href="/items/<%= item.id %>" class="block bg-white rounded-lg shadow hover:shadow-xl hover:-translate-y-1 transition duration-300 overflow-hidden">
+        <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
+          <% if (item.itemImages && item.itemImages.length > 0) { %>
+            <img src="/uploads/items/<%= item.itemImages[0].imageUrl %>" class="w-full h-full object-cover" />
+          <% } else { %>
+            <span class="text-gray-400 text-sm">No Image</span>
+          <% } %>
+        </div>
+        <div class="bg-gray-100 p-2 text-center text-sm font-semibold truncate">
+          <%= item.title %>
+        </div>
+      </a>
+    <% }) %>
+  </div>
+</section>
+
+
+  </main>
+    <%- include('../layout/footer') %>
 </body>
 </html>
