@@ -17,22 +17,35 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         <!-- Gambar & User -->
-        <div>
-          <!-- Header (bisa diganti dengan avatar user atau info lainnya) -->
+        <div class="relative">
+          <!-- Header -->
           <div class="flex items-center space-x-2 mb-4">
             <div class="w-8 h-8 bg-gray-300 text-white rounded-full flex items-center justify-center text-sm font-bold">OP</div>
             <span class="text-sm text-gray-600">(Header)</span>
           </div>
 
-          <!-- Carousel Gambar -->
-          <div class="relative items-center">
-            <div id="carousel" class="flex overflow-x-auto space-x-4 snap-x snap-mandatory rounded-lg">
+          <!-- Carousel -->
+          <div class="relative w-full md:w-96 mx-auto">
+            <% if (item.itemImages.length > 1) { %>
+              <!-- Tombol kiri -->
+              <button onclick="scrollCarousel(-1)" class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10 opacity-75 hover:opacity-100 transition">
+                ←
+              </button>
+
+              <!-- Tombol kanan -->
+              <button onclick="scrollCarousel(1)" class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10 opacity-75 hover:opacity-100 transition">
+                →
+              </button>
+            <% } %>
+
+            <div id="carousel" class="flex overflow-hidden scroll-smooth transition-all duration-300 rounded-lg"
+                 style="scroll-snap-type: x mandatory;">
               <% item.itemImages.forEach(img => { %>
-                <img src="/<%= img.imageUrl %>" class="w-full md:w-80 h-64 md:h-80 object-cover rounded snap-center flex-shrink-0" />
+                <div class="w-full flex-shrink-0 scroll-snap-align-start">
+                  <img src="/<%= img.imageUrl %>" class="w-full h-64 md:h-80 object-cover rounded" />
+                </div>
               <% }) %>
             </div>
-            <!-- Scroll hint -->
-            <div class="text-xs text-center text-gray-500 mt-2">← geser untuk lihat gambar lain →</div>
           </div>
         </div>
 
@@ -96,5 +109,15 @@
 
   <%- include('../layout/footer') %>
 
+  <script>
+    function scrollCarousel(direction) {
+      const container = document.getElementById('carousel');
+      const slideWidth = container.clientWidth;
+      container.scrollBy({
+        left: direction * slideWidth,
+        behavior: 'smooth'
+      });
+    }
+  </script>
 </body>
 </html>
