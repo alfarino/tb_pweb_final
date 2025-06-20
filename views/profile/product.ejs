@@ -31,7 +31,7 @@
         <!-- Produk Saya -->
        <a href="/profile/product" class="flex items-center space-x-3 px-6 py-3 bg-gray-100 font-medium text-blue-600">
           <span>👜</span>
-          <span class="text-gray-700">Produk Saya</span>
+          <span>Produk Saya</span>
         </a>
 
         <!-- Riwayat dengan Toggle -->
@@ -69,18 +69,23 @@
           <% } else { %>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <% produk.forEach(item => { %>
-                  <div class="border border-gray-200 rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition">
-                  <img src="<%= item.imageUrl %>" class="w-full h-40 object-cover rounded mb-4" alt="Gambar Produk" />
-                  <h2 class="text-lg font-semibold text-gray-800"><%= item.title %></h2>
-                  <p class="text-gray-600">Harga: Rp<%= Number(item.price).toLocaleString('id-ID') %></p> 
-                  <p class="text-sm text-gray-500 mt-1">Status: <%= item.status %></p>
-                  <div class="mt-4 flex justify-between text-sm text-blue-600">
-                  <a href="/produk/edit/<%= item.id %>" class="hover:underline">Edit</a>
-                  <a href="/produk/hapus/<%= item.id %>" class="hover:underline text-red-500">Hapus</a>
-                  </div>
-                  </div>  
+                    <div class="border border-gray-200 rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition">
+                      <% if (item.imageUrl) { %>
+                        <img src="<%= item.imageUrl.trim() %>" class="w-full h-40 object-cover rounded mb-4" alt="Gambar Produk" />
+                      <% } else { %>
+                        <div class="w-full h-40 bg-gray-200 flex items-center justify-center rounded mb-4 text-gray-500 text-sm">
+                          Tidak ada gambar
+                        </div>
+                      <% } %>
+                      <h2 class="text-lg font-semibold text-gray-800"><%= item.title %></h2>
+                      <p class="text-gray-600">Harga: Rp<%= Number(item.price).toLocaleString('id-ID') %></p> 
+                      <p class="text-sm text-gray-500 mt-1">Status: <%= item.status %></p>
+                      <div class="mt-4 flex justify-between text-sm text-blue-600">
+                      <a href="/produk/edit/<%= item.id %>" class="hover:underline">Edit</a>
+                      <a href="/produk/hapus/<%= item.id %>" class="hover:underline text-red-500">Hapus</a>
+                      </div>
+                    </div>  
                   <% }) %>
-
             </div>
           <% } %>
         </div>

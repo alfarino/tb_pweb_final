@@ -51,8 +51,8 @@ model User {
   wishlists             Wishlist[]
   wtbRequests           WtbRequest[]
   wtbResponses          WtbResponse[]
-  buyerTransactions     Transaction[]          @relation("BuyerTransactions")
-  sellerTransactions    Transaction[]          @relation("SellerTransactions")
+  TransaksiPembeli      Transaksi[]            @relation("TransaksiPembeli")
+  TransaksiPenjual      Transaksi[]            @relation("TransaksiPenjual")
   discussions           Discussion[]
   comments              Comment[]
   notifications         Notification[]
@@ -90,7 +90,7 @@ model Item {
   itemImages      ItemImage[]
   barterRequests  BarterRequest[]
   wishlists       Wishlist[]
-  transactions    Transaction[]
+  transaksi       Transaksi[]      @relation("ItemTransaksi")
   priceHistories  PriceHistory[]
   recommendations Recommendation[]
   carts           Cart[]
@@ -123,31 +123,32 @@ model AcademicData {
   @@map("academic_data")
 }
 
-// ============= TRANSACTION TABLES =============
-model Transaction {
-  id            Int               @id @default(autoincrement())
-  buyerId       Int
-  sellerId      Int
-  itemId        Int
-  amount        Decimal           @db.Decimal(10, 2)
-  status        TransactionStatus @default(PENDING)
-  paymentMethod String?
-  paymentStatus PaymentStatus     @default(UNPAID)
-  codLocation   String?
-  notes         String?           @db.Text
-  completedAt   DateTime?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  // Relations
-  buyer         User              @relation("BuyerTransactions", fields: [buyerId], references: [id])
-  seller        User              @relation("SellerTransactions", fields: [sellerId], references: [id])
-  item          Item              @relation(fields: [itemId], references: [id])
+// ============= TABLE TRANSAKSI =============
+model Transaksi {
+  id          Int              @id @default(autoincrement()) // ID unik transaksi, auto increment
+  pembeliId   Int // ID pengguna sebagai pembeli
+  penjualId   Int // ID pengguna sebagai penjual
+  itemId      Int // ID barang yang dibeli
+  jumlah      Decimal          @db.Decimal(10, 2) // Jumlah uang transaksi
+  status      StatusTransaksi  @default(PENDING) // Status transaksi (PENDING, SUCCESS, dll)
+  metodeBayar String? // Metode pembayaran yang digunakan (opsional)
+  statusBayar StatusPembayaran @default(UNPAID) // Status pembayaran (UNPAID, PAID, dll)
+  lokasiCOD   String? // Lokasi Cash On Delivery jika berlaku (opsional)
+  catatan     String?          @db.Text // Catatan tambahan (opsional)
+  completedAt DateTime? // Waktu transaksi selesai (opsional)
+  createdAt   DateTime         @default(now()) // Tanggal dibuatnya transaksi
+  updatedAt   DateTime         @updatedAt // Tanggal diperbarui secara otomatis
 
-  @@index([buyerId])
-  @@index([sellerId])
+  // Relasi
+  pembeli User @relation("TransaksiPembeli", fields: [pembeliId], references: [id])
+  penjual User @relation("TransaksiPenjual", fields: [penjualId], references: [id])
+  item    Item @relation("ItemTransaksi", fields: [itemId], references: [id])
+
+  @@index([pembeliId])
+  @@index([penjualId])
   @@index([itemId])
   @@index([status])
-  @@map("transactions")
+  @@map("transaksi") // Nama tabel di database tetap "Transaksi"
 }
 
 model BarterRequest {
@@ -299,7 +300,7 @@ model Notification {
   type        NotificationType
   title       String
   message     String           @db.Text
-  relatedId   Int? // ID of related entity (item, transaction, etc.)
+  relatedId   Int? // ID of related entity (item, transaksi, etc.)
   relatedType String? // Type of related entity
   isRead      Boolean          @default(false)
   createdAt   DateTime         @default(now())
@@ -472,7 +473,7 @@ enum ItemCondition {
   POOR
 }
 
-enum TransactionStatus {
+enum StatusTransaksi {
   PENDING
   CONFIRMED
   IN_PROGRESS
@@ -481,7 +482,7 @@ enum TransactionStatus {
   DISPUTED
 }
 
-enum PaymentStatus {
+enum StatusPembayaran {
   UNPAID
   PAID
   REFUNDED

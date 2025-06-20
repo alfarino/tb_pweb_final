@@ -90,7 +90,7 @@ exports.getUserProducts = async (req, res) => {
       title: item.title,
       price: parseFloat(item.price),
       status: item.status,
-      imageUrl: item.itemImages[0]?.imageUrl || null
+      imageUrl: item.itemImages[0]?.imageUrl.trim() || null
     }));
 
     // DEBUG: Cek path final
@@ -170,5 +170,39 @@ exports.addItem = async (req, res) => {
   } catch (err) {
     console.error('Gagal menambahkan item:', err);
     res.status(500).send('Terjadi kesalahan saat menambahkan produk.');
+  }
+};
+
+// Ambil data riwayat pembelian user
+exports.getRiwayatPembelian = async (req, res) => {
+  try {
+    const userId = req.session.user?.id; // Ganti dengan session user ID sesungguhnya
+     if (!userId) return res.status(401).send('Unauthorized');
+
+    const pembelian = await prisma.transaksi.findMany({
+      where: {
+        pembeliId: userId
+      },
+      include: {
+        item: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    // Siapkan data untuk ditampilkan ke EJS
+    const dataPembelian = pembelian.map(t => ({
+      nama: t.item.nama,
+      harga: t.item.harga,
+      gambar: t.item.gambar,
+      tanggal_transaksi: t.tanggal_transaksi.toISOString().split('T')[0], // Format yyyy-mm-dd
+      status: t.status
+    }));
+
+    res.render('profile/history-buy', { pembelian: dataPembelian });
+  } catch (err) {
+    console.error('Gagal mengambil data pembelian:', err);
+    res.status(500).send('Terjadi kesalahan saat mengambil riwayat pembelian');
   }
 };

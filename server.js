@@ -39,7 +39,7 @@ function requireLogin(req, res, next) {
 
 // ✅ Import Routes
 const itemRoutes = require("./routes/itemRoutes");
-const profileRouter = require("./routes/profileRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 const cartRoutes = require('./routes/keranjangRoutes');
 
 app.use((req, res, next) => {
@@ -50,7 +50,7 @@ app.use((req, res, next) => {
 // ✅ Gunakan Routes
 app.use("/items", itemRoutes);
 app.use('/keranjang', requireLogin, cartRoutes);
-app.use("/profile", requireLogin, profileRouter); // Proteksi semua route profile
+app.use("/profile", requireLogin, profileRoutes); // Proteksi semua route profile
 
 
 // ✅ Login Routes

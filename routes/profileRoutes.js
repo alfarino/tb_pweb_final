@@ -10,4 +10,6 @@ router.get('/product', itemController.getUserProducts);
 
 router.get('/main-profile', itemController.getUserProfile);
 
+router.get('/history-buy', itemController.getRiwayatPembelian);
+
 module.exports = router;
