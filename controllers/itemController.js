@@ -1,55 +1,59 @@
 const prisma = require('../prisma/client'); // inisialisasi prisma client
 
-exports.getItemDetail = async (req, res) => {
-  const itemId = parseInt(req.params.id); // ambil ID dari URL
+  exports.getItemDetail = async (req, res) => {
+    const itemId = parseInt(req.params.id); // ambil ID dari URL
 
-  try {
-    const itemRaw = await prisma.item.findUnique({
-      where: { id: itemId },
-      include: {
-        itemImages: {
-          orderBy: { sortOrder: 'asc' }
+    try {
+      const itemRaw = await prisma.item.findUnique({
+        where: { id: itemId, isActive: true, isAvailable: true }, // pastikan item aktif
+        include: {
+          itemImages: {
+            orderBy: { sortOrder: 'asc' }
+          },
+          priceHistories: true
         },
-        priceHistories: true
-      },
-    });
+      });
 
-    if (!itemRaw) {
-      return res.status(404).render('errors/404', { message: 'Item tidak ditemukan' });
+      if (!itemRaw) {
+        return res.status(404).render('errors/404', { message: 'Item tidak ditemukan' });
+      }
+
+      const item = {
+        ...itemRaw,
+        imageUrl: itemRaw.itemImages.length > 0 ? itemRaw.itemImages[0].imageUrl : null
+      };
+
+
+      if (!item) {
+        return res.status(404).render('errors/404', { message: 'Item tidak ditemukan' });
+      }
+
+      const produkLainnya = await prisma.item.findMany({
+        where: { id: { not: itemId }, isActive: true, isAvailable: true }, // pastikan produk lain aktif
+        include: {
+          itemImages: {
+            where: { isPrimary: true },
+            take: 1
+          }
+        },
+        take: 6 // batasi jumlah produk lainnya
+      });
+
+      // kirim data ke file EJS views/items/detail.ejs
+      res.render('items/detail', { item, items: produkLainnya });
+    } catch (error) {
+      console.error(error);
+      res.status(500).render('errors/500', { message: 'Server error' });
     }
-
-    const item = {
-      ...itemRaw,
-      imageUrl: itemRaw.itemImages.length > 0 ? `/${itemRaw.itemImages[0].imageUrl}` : null
-    };
-
-
-    if (!item) {
-      return res.status(404).render('errors/404', { message: 'Item tidak ditemukan' });
-    }
-
-    const produkLainnya = await prisma.item.findMany({
-      where: { id: { not: itemId } },
-      include: {
-        itemImages: {
-          where: { isPrimary: true },
-          take: 1
-        }
-      },
-      take: 6 // batasi jumlah produk lainnya
-    });
-
-    // kirim data ke file EJS views/items/detail.ejs
-    res.render('items/detail', { item, items: produkLainnya });
-  } catch (error) {
-    console.error(error);
-    res.status(500).render('errors/500', { message: 'Server error' });
-  }
-};
+  };
 
 exports.getItemList = async (req, res) => {
   try {
     const items = await prisma.item.findMany({
+      where: {
+        isActive: true,
+        isAvailable: true
+      },
       include: { itemImages: true }
     });
 
@@ -86,7 +90,7 @@ exports.getUserProducts = async (req, res) => {
       title: item.title,
       price: parseFloat(item.price),
       status: item.status,
-      imageUrl: item.itemImages[0] ? `/${item.itemImages[0].imageUrl}` : null
+      imageUrl: item.itemImages[0]?.imageUrl || null
     }));
 
     // DEBUG: Cek path final
