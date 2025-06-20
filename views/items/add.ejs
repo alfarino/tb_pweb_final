@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tambah Produk - CampusExchange</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <%- include('../layout/navbar') %>
+
+  <div class="flex flex-1">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-black rounded-full"></div>
+          <span class="text-gray-700 font-semibold"><%= user?.fullName || '(Nama Akun)' %></span>
+        </div>
+      </div>
+      <nav class="mt-4 space-y-1">
+        <a href="/profile/main-profile" class="flex items-center space-x-3 px-6 py-3 hover:bg-gray-100 font-medium">
+          <span>👤</span>
+          <span>Akun Saya</span>
+        </a>
+        <a href="/profile/product" class="flex items-center space-x-3 px-6 py-3 bg-gray-100 font-medium text-blue-600">
+          <span>👜</span>
+          <span>Produk Saya</span>
+        </a>
+        <div>
+          <button onclick="toggleRiwayat()" class="w-full px-6 py-3 flex items-center justify-between hover:bg-gray-100 font-medium text-blue-600 focus:outline-none">
+            <div class="flex items-center space-x-3">
+              <span>📊</span>
+              <span class="text-gray-700">Riwayat</span>
+            </div>
+            <span id="arrow-icon" class="text-gray-500 text-sm">&#9660;</span>
+          </button>
+          <div id="riwayatSubmenu" class="hidden ml-14 mt-1 space-y-1">
+            <a href="/profile/history-buy" class="block text-gray-600 font-medium hover:text-blue-600 pt-4">Pembelian</a>
+            <a href="/riwayat/penjualan" class="block text-gray-600 font-medium hover:text-blue-600 pt-4">Penjualan</a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-10 overflow-y-auto">
+      <div class="bg-white rounded-xl shadow-md p-8 max-w-3xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-3xl font-bold text-gray-800">Tambah Produk</h1>
+        </div>
+
+        <form action="/items/add" method="POST" enctype="multipart/form-data" class="space-y-6">
+          <!-- Judul -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Nama Produk</label>
+            <input name="title" type="text" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <!-- Deskripsi -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Deskripsi</label>
+            <textarea name="description" rows="4" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+
+          <!-- Harga -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Harga (Rp)</label>
+            <input name="price" type="number" min="0" step="0.01" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <!-- Kategori -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Kategori</label>
+            <input name="category" type="text" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <!-- Kondisi -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Kondisi</label>
+            <select name="condition" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500">
+              <option value="NEW">Baru</option>
+              <option value="USED">Bekas</option>
+            </select>
+          </div>
+
+          <!-- Detail Kondisi -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Detail Kondisi</label>
+            <input name="conditionDetail" type="text" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <!-- Lokasi -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Lokasi</label>
+            <input name="location" type="text" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <!-- Upload Gambar -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Upload Gambar</label>
+            <input name="image" type="file" accept="image/*" required class="block w-full text-gray-700" />
+          </div>
+
+          <!-- Submit -->
+          <div>
+            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
+              Simpan Produk
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <%- include('../layout/footer') %>
+
+  <!-- Toggle Riwayat Script -->
+  <script>
+    function toggleRiwayat() {
+      const submenu = document.getElementById("riwayatSubmenu");
+      const arrow = document.getElementById("arrow-icon");
+      submenu.classList.toggle("hidden");
+      arrow.innerHTML = submenu.classList.contains("hidden") ? "&#9660;" : "&#9650;";
+    }
+  </script>
+</body>
+</html>

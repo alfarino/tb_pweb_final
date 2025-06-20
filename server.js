@@ -42,6 +42,10 @@ const itemRoutes = require("./routes/itemRoutes");
 const profileRouter = require("./routes/profileRoutes");
 const cartRoutes = require('./routes/keranjangRoutes');
 
+app.use((req, res, next) => {
+  res.locals.user = req.session.user;
+  next();
+});
 
 // ✅ Gunakan Routes
 app.use("/items", itemRoutes);

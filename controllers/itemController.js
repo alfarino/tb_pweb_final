@@ -124,3 +124,47 @@ exports.getUserProfile = async (req, res) => {
   }
 };
 
+
+exports.renderAddForm = (req, res) => {
+  res.render('items/add', {
+    user: req.session.user // ✅ kirim data user ke view
+  });
+};
+
+exports.addItem = async (req, res) => {
+  try {
+    const { title, description, price, category, condition, conditionDetail, location } = req.body;
+    const userId = req.session.user.id;
+
+    // Simpan data produk
+    const newItem = await prisma.item.create({
+      data: {
+        userId,
+        title,
+        description,
+        price: parseFloat(price),
+        category,
+        condition,
+        conditionDetail,
+        location,
+        isActive: true,
+      },
+    });
+
+    // Simpan gambar
+    if (req.file) {
+      await prisma.itemImage.create({
+        data: {
+          itemId: newItem.id,
+          imageUrl: req.file.path, // URL Cloudinary (mirip sebelumnya)
+          isPrimary: true
+        }
+      });
+    }
+
+    res.redirect('/profile/product');
+  } catch (err) {
+    console.error('Gagal menambahkan item:', err);
+    res.status(500).send('Terjadi kesalahan saat menambahkan produk.');
+  }
+};

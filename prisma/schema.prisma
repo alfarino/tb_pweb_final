@@ -515,6 +515,7 @@ enum NotificationType {
   SYSTEM_ANNOUNCEMENT
   DONATION_REQUEST
   BADGE_EARNED
+  AN_ITEM_POST
 }
 
 enum BadgeType {
