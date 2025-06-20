@@ -99,17 +99,30 @@
           </div>
 
           <!-- Upload Gambar -->
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">Upload Gambar</label>
-            <input name="image" type="file" accept="image/*" required class="block w-full text-gray-700" />
-          </div>
+            <!-- Upload Gambar Utama -->
+            <div>
+            <label class="block text-gray-700 font-medium mb-1">Gambar Utama</label>
+            <input name="primaryImage" type="file" accept="image/*" required class="block w-full text-gray-700" />
+            </div>
 
+            <!-- Upload Gambar Tambahan -->
+            <div>
+            <label class="block text-gray-700 font-medium mb-1">Gambar Tambahan</label>
+            <input name="additionalImages" type="file" accept="image/*" multiple class="block w-full text-gray-700" />
+            </div>
+
+
+            <br>
           <!-- Submit -->
-          <div>
-            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
-              Simpan Produk
-            </button>
-          </div>
+            <div class="flex justify-between items-center mt-4">
+                <button type="button" onclick="history.back()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition">
+                Batal
+                </button>
+                <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
+                Simpan Produk
+                </button>
+            </div>
+
         </form>
       </div>
     </main>

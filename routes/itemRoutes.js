@@ -3,14 +3,23 @@ const router = express.Router();
 const itemController = require('../controllers/itemController');
 const { upload } = require('../utils/cloudinary');
 
-// ✨ PASTIKAN YANG INI DI ATAS DULU
-router.get('/add', itemController.renderAddForm);
-router.post('/add', upload.single('image'), itemController.addItem);
+// ✨ Tambahkan dukungan upload multiple image
+const multerFields = upload.fields([
+  { name: 'primaryImage', maxCount: 1 },
+  { name: 'additionalImages', maxCount: 5 }
+]);
 
+// ✨ Form tambah item (pastikan sebelum :id)
+router.get('/add', itemController.renderAddForm);
+router.post('/add', multerFields, itemController.addItem);
+
+// 📦 Produk milik user
 router.get('/user-products', itemController.getUserProducts);
+
+// 🏠 Daftar semua item
 router.get('/', itemController.getItemList);
 
-// ⛔ INI HARUS PALING BAWAH
+// ⛔ Detail produk harus paling bawah agar tidak konflik dengan "/add" dll
 router.get('/:id', itemController.getItemDetail);
 
 module.exports = router;

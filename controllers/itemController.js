@@ -140,7 +140,6 @@ exports.addItem = async (req, res) => {
     const { title, description, price, category, condition, conditionDetail, location } = req.body;
     const userId = req.session.user.id;
 
-    // Simpan data produk
     const newItem = await prisma.item.create({
       data: {
         userId,
@@ -152,18 +151,38 @@ exports.addItem = async (req, res) => {
         conditionDetail,
         location,
         isActive: true,
+        isAvailable: true,
       },
     });
 
-    // Simpan gambar
-    if (req.file) {
+    const files = req.files || {};
+
+    // Gambar utama
+    if (files.primaryImage && files.primaryImage.length > 0) {
       await prisma.itemImage.create({
         data: {
           itemId: newItem.id,
-          imageUrl: req.file.path, // URL Cloudinary (mirip sebelumnya)
-          isPrimary: true
+          imageUrl: files.primaryImage[0].path,
+          isPrimary: true,
+          sortOrder: 0
         }
       });
+    }
+
+    // Gambar tambahan
+    if (files.additionalImages && files.additionalImages.length > 0) {
+      await Promise.all(
+        files.additionalImages.map((file, idx) =>
+          prisma.itemImage.create({
+            data: {
+              itemId: newItem.id,
+              imageUrl: file.path,
+              isPrimary: false,
+              sortOrder: idx + 1
+            }
+          })
+        )
+      );
     }
 
     res.redirect('/profile/product');
@@ -172,3 +191,4 @@ exports.addItem = async (req, res) => {
     res.status(500).send('Terjadi kesalahan saat menambahkan produk.');
   }
 };
+
