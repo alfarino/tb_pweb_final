@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Keranjang Belanja</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex flex-col min-h-screen bg-green-500">
+  <%- include('../layout/navbar') %>
+
+  <!-- Main content with white background -->
+  <main class="flex-1 bg-white relative">
+    <!-- Container with full width and proper spacing -->
+    <div class="max-w-7xl mx-auto px-6 py-8">
+      <!-- Logo and Title section -->
+      <div class="flex items-center mb-8">
+        <div class="text-lg font-medium text-gray-600 mr-4">Logo</div>
+        <div class="w-px h-8 bg-gray-300 mr-4"></div>
+        <h1 class="text-2xl font-bold text-gray-800">Keranjang Belanja</h1>
+      </div>
+
+      <!-- Table container with proper styling -->
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Produk</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Harga satuan</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Kuantitas</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Total Harga</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <% if (carts.length === 0) { %>
+              <tr>
+                <td colspan="5" class="text-center py-12 text-gray-500">
+                  <div class="text-lg">Keranjang kosong.</div>
+                </td>
+              </tr>
+            <% } else { %>
+              <% carts.forEach(cart => { %>
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-6">
+                    <div class="flex items-center space-x-4">
+                      <!-- Checkbox for selection -->
+                      <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                      
+                      <!-- Product image -->
+                      <div class="w-16 h-16 bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center">
+                        <% if (cart.item.itemImages && cart.item.itemImages.length > 0) { %>
+                          <img src="/uploads/items/<%= cart.item.itemImages[0].imageUrl %>" 
+                               alt="<%= cart.item.title %>"
+                               class="w-full h-full object-cover" />
+                        <% } else { %>
+                          <span class="text-gray-400 text-2xl">📷</span>
+                        <% } %>
+                      </div>
+                      
+                      <!-- Product info -->
+                      <div class="flex flex-col">
+                        <div class="font-semibold text-gray-900 text-lg"><%= cart.item.title %></div>
+                        <div class="text-sm text-gray-500">(Header)</div>
+                      </div>
+                    </div>
+                  </td>
+                  
+                  <td class="px-6 py-6 text-gray-900 font-medium">
+                    Rp <%= Number(cart.item.price).toLocaleString('id-ID') %>
+                  </td>
+                  
+                  <td class="px-6 py-6">
+                    <form action="/keranjang/update/<%= cart.id %>" method="POST" class="flex items-center space-x-2">
+                      <button type="submit" name="action" value="decrease" 
+                        class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition-colors <%= cart.quantity === 1 ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                        <%= cart.quantity === 1 ? 'disabled' : '' %>>
+                        <span class="text-lg font-medium">−</span>
+                      </button>
+                      <input type="text" name="quantity" value="<%= cart.quantity %>" readonly 
+                             class="w-12 h-8 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      <button type="submit" name="action" value="increase" 
+                              class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition-colors">
+                        <span class="text-lg font-medium">+</span>
+                      </button>
+                    </form>
+                  </td>
+                  
+                  <td class="px-6 py-6 text-gray-900 font-semibold text-lg">
+                    Rp <%= Number(cart.item.price * cart.quantity).toLocaleString('id-ID') %>
+                  </td>
+                  
+                  <td class="px-6 py-6">
+                    <form action="/keranjang/delete/<%= cart.id %>" method="POST" 
+                          onsubmit="return confirm('Yakin ingin menghapus item ini?')">
+                      <button type="submit" 
+                              class="bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 transition-colors">
+                        HAPUS
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Checkout button -->
+      <% if (carts.length > 0) { %>
+        <div class="mt-8 flex justify-end">
+          <a href="/checkout" 
+             class="bg-green-500 text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-green-600 transition-colors shadow-lg">
+            Checkout
+          </a>
+        </div>
+      <% } %>
+    </div>
+  </main>
+
+  <%- include('../layout/footer') %>
+</body>
+</html>
