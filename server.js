@@ -12,6 +12,7 @@ const prisma = new PrismaClient();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+
 // ✅ Static Files Middleware
 // Menyediakan akses langsung ke file di folder /public
 app.use(express.static(path.join(__dirname, "public")));
@@ -38,7 +39,7 @@ function requireLogin(req, res, next) {
 
 // ✅ Import Routes
 const itemRoutes = require("./routes/itemRoutes");
-const profileRouter = require("./routes/profile");
+const profileRouter = require("./routes/profileRoutes");
 const cartRoutes = require('./routes/keranjangRoutes');
 
 
@@ -46,6 +47,7 @@ const cartRoutes = require('./routes/keranjangRoutes');
 app.use("/items", itemRoutes);
 app.use('/keranjang', requireLogin, cartRoutes);
 app.use("/profile", requireLogin, profileRouter); // Proteksi semua route profile
+
 
 // ✅ Login Routes
 app.get("/login", (req, res) => {
@@ -88,6 +90,7 @@ app.get("/logout", (req, res) => {
 // ✅ Beranda (Home)
 const itemController = require("./controllers/itemController");
 app.get("/", requireLogin, itemController.getItemList);
+app.get("/product", requireLogin, itemController.getUserProducts);
 
 // ✅ Jalankan Server
 app.listen(PORT, () => {

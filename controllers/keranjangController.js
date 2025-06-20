@@ -43,7 +43,7 @@ exports.updateCartQuantity = async (req, res) => {
       data: { quantity: updatedQty }
     });
 
-    res.redirect('/cart');
+    res.redirect('/keranjang');
   } catch (error) {
     console.error('Error updateCartQuantity:', error);
     res.status(500).send('Gagal memperbarui jumlah');
@@ -56,9 +56,58 @@ exports.deleteCartItem = async (req, res) => {
 
   try {
     await prisma.cart.delete({ where: { id: cartId } });
-    res.redirect('/cart');
+    res.redirect('/keranjang');
   } catch (error) {
     console.error('Error deleteCartItem:', error);
     res.status(500).send('Gagal menghapus item');
+  }
+};
+
+exports.addToCart = async (req, res) => {
+  try {
+    const { itemId, quantity, redirect } = req.body;
+    const userId = req.session.user.id;
+    
+    // Convert ke integer
+    const itemIdInt = parseInt(itemId);
+    const quantityInt = parseInt(quantity) || 1;
+    
+    // Cek apakah item sudah ada di keranjang user
+    const existingCart = await prisma.cart.findFirst({
+      where: {
+        userId: userId,
+        itemId: itemIdInt
+      }
+    });
+    
+    if (existingCart) {
+      // Jika sudah ada, tambah quantity
+      await prisma.cart.update({
+        where: { id: existingCart.id },
+        data: { quantity: existingCart.quantity + quantityInt }
+      });
+    } else {
+      // Jika belum ada, buat record baru
+      await prisma.cart.create({
+        data: {
+          userId: userId,
+          itemId: itemIdInt,
+          quantity: quantityInt
+        }
+      });
+    }
+    
+    // Tentukan redirect berdasarkan parameter
+    if (redirect === 'checkout') {
+      // Untuk "Beli Sekarang" - langsung ke checkout
+      res.redirect('/keranjang');
+    } else {
+      // Untuk "Masukkan Keranjang" - ke halaman keranjang
+      res.redirect('/keranjang');
+    }
+    
+  } catch (error) {
+    console.error('Error addToCart:', error);
+    res.status(500).send('Gagal menambahkan item ke keranjang');
   }
 };

@@ -37,9 +37,26 @@
             <%= item.description %>
           </div>
 
-          <div class="flex space-x-4">
-            <a class="bg-green-200 text-green-800 px-4 py-2 rounded-full hover:bg-green-300 transition">Masukkan Keranjang</button>
-            <a href="/keranjang" class="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition">Beli Sekarang</a>
+          <div class="flex items-center space-x-4">
+            <!-- Tombol Masukkan Keranjang -->
+            <form action="/keranjang/keranjang/add" method="POST">
+              <input type="hidden" name="itemId" value="<%= item.id %>">
+              <input type="hidden" name="quantity" value="1">
+              <input type="hidden" name="redirect" value="cart">
+              <button type="submit" class="bg-green-200 text-green-800 px-6 py-2 rounded-full hover:bg-green-300 transition font-semibold">
+                Masukkan Keranjang
+              </button>
+            </form>
+
+            <!-- Tombol Beli Sekarang -->
+            <form action="/keranjang/keranjang/add" method="POST">
+              <input type="hidden" name="itemId" value="<%= item.id %>">
+              <input type="hidden" name="quantity" value="1">
+              <input type="hidden" name="redirect" value="checkout">
+              <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition font-semibold">
+                Beli Sekarang
+              </button>
+            </form>
           </div>
         </div>
       </div>
