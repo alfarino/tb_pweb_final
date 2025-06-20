@@ -5,5 +5,5 @@ const itemController = require('../controllers/itemController');
 
 router.get('/:id', itemController.getItemDetail);
 router.get('/', itemController.getItemList);
-
+router.get('/user-products', itemController.getUserProducts);
 module.exports = router;

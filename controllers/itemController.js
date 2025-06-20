@@ -34,6 +34,7 @@ exports.getItemList = async (req, res) => {
   }
 };
 
+// Tambahkan console.log untuk debugging
 exports.getUserProducts = async (req, res) => {
   try {
     const items = await prisma.item.findMany({
@@ -48,13 +49,22 @@ exports.getUserProducts = async (req, res) => {
       }
     });
 
+    // DEBUG: Cek apa yang ada di database
+    console.log('Raw item images:', items.map(item => ({
+      id: item.id,
+      imageUrl: item.itemImages[0]?.imageUrl
+    })));
+
     const produk = items.map(item => ({
       id: item.id,
       title: item.title,
       price: parseFloat(item.price),
       status: item.status,
-      imageUrl: item.itemImages[0] ? `/uploads/items/${item.itemImages[0].imageUrl}` : null
+      imageUrl: item.itemImages[0] ? `/${item.itemImages[0].imageUrl}` : null
     }));
+
+    // DEBUG: Cek path final
+    console.log('Final image URLs:', produk.map(p => ({ id: p.id, imageUrl: p.imageUrl })));
 
     res.render('profile/product', {
       produk,
@@ -65,7 +75,6 @@ exports.getUserProducts = async (req, res) => {
     res.status(500).send('Gagal mengambil produk');
   }
 };
-
 
 
 
