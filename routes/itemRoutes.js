@@ -13,6 +13,10 @@ const multerFields = upload.fields([
 router.get('/add', itemController.renderAddForm);
 router.post('/add', multerFields, itemController.addItem);
 
+// ✨ Form Edit Produk
+router.get('/edit/:id', itemController.getEditItem);
+router.post('/edit/:id', multerFields, itemController.updateItem);
+
 // 📦 Produk milik user
 router.get('/user-products', itemController.getUserProducts);
 

@@ -1,59 +1,49 @@
 const prisma = require('../prisma/client'); // inisialisasi prisma client
+const { cloudinary } = require('../utils/cloudinary'); // pastikan cloudinary sudah diinisialisasi
 
-  exports.getItemDetail = async (req, res) => {
-    const itemId = parseInt(req.params.id); // ambil ID dari URL
+exports.getItemDetail = async (req, res) => {
+  const itemId = parseInt(req.params.id);
 
-    try {
-      const itemRaw = await prisma.item.findUnique({
-        where: { id: itemId, isActive: true, isAvailable: true }, // pastikan item aktif
-        include: {
-          itemImages: {
-            orderBy: { sortOrder: 'asc' }
-          },
-          priceHistories: true
-        },
-      });
+  try {
+    const itemRaw = await prisma.item.findUnique({
+      where: { id: itemId, isActive: true, isAvailable: true },
+      include: {
+        itemImages: { orderBy: { sortOrder: 'asc' } },
+        priceHistories: true
+      },
+    });
 
-      if (!itemRaw) {
-        return res.status(404).render('errors/404', { message: 'Item tidak ditemukan' });
-      }
-
-      const item = {
-        ...itemRaw,
-        imageUrl: itemRaw.itemImages.length > 0 ? itemRaw.itemImages[0].imageUrl : null
-      };
-
-
-      if (!item) {
-        return res.status(404).render('errors/404', { message: 'Item tidak ditemukan' });
-      }
-
-      const produkLainnya = await prisma.item.findMany({
-        where: { id: { not: itemId }, isActive: true, isAvailable: true }, // pastikan produk lain aktif
-        include: {
-          itemImages: {
-            where: { isPrimary: true },
-            take: 1
-          }
-        },
-        take: 6 // batasi jumlah produk lainnya
-      });
-
-      // kirim data ke file EJS views/items/detail.ejs
-      res.render('items/detail', { item, items: produkLainnya });
-    } catch (error) {
-      console.error(error);
-      res.status(500).render('errors/500', { message: 'Server error' });
+    if (!itemRaw) {
+      return res.status(404).render('errors/404', { message: 'Item tidak ditemukan' });
     }
-  };
+
+    const item = {
+      ...itemRaw,
+      imageUrl: itemRaw.itemImages.length > 0 ? itemRaw.itemImages[0].imageUrl : null
+    };
+
+    const produkLainnya = await prisma.item.findMany({
+      where: { id: { not: itemId }, isActive: true, isAvailable: true },
+      include: {
+        itemImages: {
+          where: { isPrimary: true },
+          take: 1
+        }
+      },
+      take: 6
+    });
+
+    res.render('items/detail', { item, items: produkLainnya });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('errors/500', { message: 'Server error' });
+  }
+};
 
 exports.getItemList = async (req, res) => {
   try {
     const items = await prisma.item.findMany({
-      where: {
-        isActive: true,
-        isAvailable: true
-      },
+      where: { isActive: true, isAvailable: true },
       include: { itemImages: true }
     });
 
@@ -64,13 +54,10 @@ exports.getItemList = async (req, res) => {
   }
 };
 
-// Tambahkan console.log untuk debugging
 exports.getUserProducts = async (req, res) => {
   try {
     const items = await prisma.item.findMany({
-      where: {
-        userId: req.session.user.id
-      },
+      where: { userId: req.session.user.id },
       include: {
         itemImages: {
           where: { isPrimary: true },
@@ -79,7 +66,6 @@ exports.getUserProducts = async (req, res) => {
       }
     });
 
-    // DEBUG: Cek apa yang ada di database
     console.log('Raw item images:', items.map(item => ({
       id: item.id,
       imageUrl: item.itemImages[0]?.imageUrl
@@ -93,7 +79,6 @@ exports.getUserProducts = async (req, res) => {
       imageUrl: item.itemImages[0]?.imageUrl || null
     }));
 
-    // DEBUG: Cek path final
     console.log('Final image URLs:', produk.map(p => ({ id: p.id, imageUrl: p.imageUrl })));
 
     res.render('profile/product', {
@@ -106,32 +91,26 @@ exports.getUserProducts = async (req, res) => {
   }
 };
 
-
-
 exports.getUserProfile = async (req, res) => {
   try {
-    const userId = 1; // Ganti dengan ID yang benar, bisa dari session nanti
+    const userId = 1; // Ganti dengan ID dari session nanti
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId }, 
-    });
+    const user = await prisma.user.findUnique({ where: { id: userId } });
 
     if (!user) {
       return res.status(404).render('errors/404', { message: 'User tidak ditemukan' });
     }
 
     res.render('profile/main-profile', { user });
-
   } catch (error) {
     console.error('Gagal mengambil data user:', error);
     res.status(500).render('errors/500', { message: 'Terjadi kesalahan server' });
   }
 };
 
-
 exports.renderAddForm = (req, res) => {
   res.render('items/add', {
-    user: req.session.user // ✅ kirim data user ke view
+    user: req.session.user
   });
 };
 
@@ -139,6 +118,11 @@ exports.addItem = async (req, res) => {
   try {
     const { title, description, price, category, condition, conditionDetail, location } = req.body;
     const userId = req.session.user.id;
+
+    // Validasi: gambar utama harus ada
+    if (!req.files?.primaryImage || req.files.primaryImage.length === 0) {
+      return res.status(400).send("Gambar utama wajib diisi.");
+    }
 
     const newItem = await prisma.item.create({
       data: {
@@ -151,25 +135,23 @@ exports.addItem = async (req, res) => {
         conditionDetail,
         location,
         isActive: true,
-        isAvailable: true,
-      },
+        isAvailable: true
+      }
     });
 
     const files = req.files || {};
 
-    // Gambar utama
-    if (files.primaryImage && files.primaryImage.length > 0) {
-      await prisma.itemImage.create({
-        data: {
-          itemId: newItem.id,
-          imageUrl: files.primaryImage[0].path,
-          isPrimary: true,
-          sortOrder: 0
-        }
-      });
-    }
+    // Simpan gambar utama
+    await prisma.itemImage.create({
+      data: {
+        itemId: newItem.id,
+        imageUrl: files.primaryImage[0].path,
+        isPrimary: true,
+        sortOrder: 0
+      }
+    });
 
-    // Gambar tambahan
+    // Simpan gambar tambahan (jika ada)
     if (files.additionalImages && files.additionalImages.length > 0) {
       await Promise.all(
         files.additionalImages.map((file, idx) =>
@@ -191,4 +173,102 @@ exports.addItem = async (req, res) => {
     res.status(500).send('Terjadi kesalahan saat menambahkan produk.');
   }
 };
+
+exports.getEditItem = async (req, res) => {
+  const itemId = parseInt(req.params.id);
+  const item = await prisma.item.findUnique({
+    where: { id: itemId },
+    include: { itemImages: { orderBy: { sortOrder: 'asc' } } },
+  });
+
+  if (!item || item.userId !== req.session.user.id) {
+    return res.status(403).send("Akses ditolak");
+  }
+
+  res.render('items/edit', { item, user: req.session.user });
+};
+
+exports.updateItem = async (req, res) => {
+  const itemId = parseInt(req.params.id);
+  const existingItem = await prisma.item.findUnique({
+    where: { id: itemId },
+    include: { itemImages: true },
+  });
+
+  if (!existingItem || existingItem.userId !== req.session.user.id) {
+    return res.status(403).send("Akses ditolak");
+  }
+
+  const {
+    title, description, price, category,
+    condition, conditionDetail, location,
+    removedImageIds = []
+  } = req.body;
+
+  const imageIdsToRemove = Array.isArray(removedImageIds)
+    ? removedImageIds
+    : [removedImageIds];
+
+  // 🗑️ Hapus gambar yang dipilih
+  for (let id of imageIdsToRemove) {
+    const img = await prisma.itemImage.findUnique({ where: { id: parseInt(id) } });
+    if (img && img.itemId === itemId) {
+      const publicId = getCloudinaryPublicId(img.imageUrl);
+      if (publicId) await cloudinary.uploader.destroy(publicId); // hapus dari cloudinary
+      await prisma.itemImage.delete({ where: { id: img.id } }); // hapus dari DB
+    }
+  }
+
+  // ✏️ Update data item
+  await prisma.item.update({
+    where: { id: itemId },
+    data: {
+      title,
+      description,
+      price: parseFloat(price),
+      category,
+      condition,
+      conditionDetail,
+      location,
+    }
+  });
+
+  // ⬆️ Simpan gambar baru (Cloudinary)
+  const files = req.files || {};
+  let sortOrder = await prisma.itemImage.count({ where: { itemId } });
+
+  if (files.primaryImage?.[0]) {
+    await prisma.itemImage.create({
+      data: {
+        itemId,
+        imageUrl: files.primaryImage[0].path, // 🟢 Gunakan Cloudinary URL
+        isPrimary: true,
+        sortOrder: 0,
+      }
+    });
+  }
+
+  if (files.additionalImages) {
+    for (const file of files.additionalImages) {
+      await prisma.itemImage.create({
+        data: {
+          itemId,
+          imageUrl: file.path, // 🟢 Gunakan Cloudinary URL
+          isPrimary: false,
+          sortOrder: sortOrder++,
+        }
+      });
+    }
+  }
+
+  res.redirect('/profile/product');
+};
+
+// Fungsi bantu untuk ambil public_id dari Cloudinary URL
+function getCloudinaryPublicId(url) {
+  if (!url || !url.includes('res.cloudinary.com')) return null;
+  const parts = url.split('/');
+  const fileName = parts.pop().split('.')[0]; // hilangkan .jpg, .png
+  return `campusexchange/items/${fileName}`;
+}
 

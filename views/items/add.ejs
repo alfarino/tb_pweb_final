@@ -166,6 +166,15 @@
       placeholder.classList.remove("hidden");
       removeBtn.classList.add("hidden");
     }
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function (e) {
+    const primaryInput = document.querySelector('input[name="primaryImage"]');
+    if (!primaryInput || !primaryInput.files.length) {
+      e.preventDefault(); // cegah submit
+      alert("Gambar utama wajib diunggah (slot pertama).");
+    }
+    });
   </script>
 </body>
 </html>

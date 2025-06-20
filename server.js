@@ -47,7 +47,7 @@ app.use((req, res, next) => {
 });
 
 // ✅ Gunakan Routes
-app.use("/items", itemRoutes);
+app.use("/items", requireLogin, itemRoutes);
 app.use('/keranjang', requireLogin, cartRoutes);
 app.use("/profile", requireLogin, profileRouter); // Proteksi semua route profile
 app.use("/want-to-buy", requireLogin, wtbRoutes);  // Menambahkan route untuk halaman "Want to Buy"
