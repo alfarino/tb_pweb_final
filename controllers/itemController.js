@@ -4,10 +4,25 @@ exports.getItemDetail = async (req, res) => {
   const itemId = parseInt(req.params.id); // ambil ID dari URL
 
   try {
-    const item = await prisma.item.findUnique({
+    const itemRaw = await prisma.item.findUnique({
       where: { id: itemId },
-      include: { itemImages: true, priceHistories: true },
+      include: {
+        itemImages: {
+          orderBy: { sortOrder: 'asc' }
+        },
+        priceHistories: true
+      },
     });
+
+    if (!itemRaw) {
+      return res.status(404).render('errors/404', { message: 'Item tidak ditemukan' });
+    }
+
+    const item = {
+      ...itemRaw,
+      imageUrl: itemRaw.itemImages.length > 0 ? `/${itemRaw.itemImages[0].imageUrl}` : null
+    };
+
 
     if (!item) {
       return res.status(404).render('errors/404', { message: 'Item tidak ditemukan' });
