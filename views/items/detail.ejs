@@ -4,26 +4,44 @@
   <meta charset="UTF-8" />
   <title><%= item.title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+  window.addEventListener("DOMContentLoaded", () => {
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dots = document.querySelectorAll('.carousel-dot');
+
+    function updateCarousel() {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('opacity-100', i === currentSlide);
+        slide.classList.toggle('opacity-0', i !== currentSlide);
+        slide.classList.toggle('pointer-events-none', i !== currentSlide);
+      });
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('bg-blue-500', i === currentSlide);
+        dot.classList.toggle('bg-gray-300', i !== currentSlide);
+      });
+    }
+
+    window.scrollCarousel = function(direction) {
+      if (!slides.length) return;
+      currentSlide = (currentSlide + direction + slides.length) % slides.length;
+      updateCarousel();
+    };
+  });
+  </script>
 </head>
 <body class="flex flex-col min-h-screen bg-white">
 
   <%- include('../layout/navbar') %>
 
-  <!-- Konten Utama -->
   <main class="flex-1 p-6 max-w-6xl mx-auto">
-
     <!-- Produk -->
     <div class="bg-gray-100 p-6 rounded-lg shadow mb-10">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        
-        <!-- Gambar & User -->
-        <div class="relative">
-          <!-- Header -->
-          <div class="flex items-center space-x-2 mb-4">
-            <div class="w-8 h-8 bg-gray-300 text-white rounded-full flex items-center justify-center text-sm font-bold">OP</div>
-            <span class="text-sm text-gray-600">(Header)</span>
-          </div>
 
+        <!-- Gambar & User -->
+        <div class="flex items-center justify-center">
           <!-- Carousel -->
           <div class="relative w-full md:w-96 mx-auto">
             <% if (item.itemImages.length > 1) { %>
@@ -31,19 +49,26 @@
               <button onclick="scrollCarousel(-1)" class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10 opacity-75 hover:opacity-100 transition">
                 ←
               </button>
-
               <!-- Tombol kanan -->
               <button onclick="scrollCarousel(1)" class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10 opacity-75 hover:opacity-100 transition">
                 →
               </button>
             <% } %>
 
-            <div id="carousel" class="flex overflow-hidden scroll-smooth transition-all duration-300 rounded-lg"
-                 style="scroll-snap-type: x mandatory;">
-              <% item.itemImages.forEach(img => { %>
-                <div class="w-full flex-shrink-0 scroll-snap-align-start">
-                  <img src="<%= img.imageUrl %>" class="w-full h-64 md:h-80 object-cover rounded" />
-                </div>
+            <div id="carousel" class="relative w-full h-64 md:h-80 rounded overflow-hidden">
+              <% item.itemImages.forEach((img, index) => { %>
+                <img
+                  src="<%= img.imageUrl %>"
+                  class="carousel-slide absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out 
+                  <% if (index === 0) { %>opacity-100<% } else { %>opacity-0 pointer-events-none<% } %>"
+                />
+              <% }) %>
+            </div>
+
+            <!-- Indicator -->
+            <div class="flex justify-center mt-2 space-x-2">
+              <% item.itemImages.forEach((_, index) => { %>
+                <div class="carousel-dot w-2 h-2 rounded-full bg-gray-300 <% if (index === 0) { %>bg-blue-500<% } %>"></div>
               <% }) %>
             </div>
           </div>
@@ -51,16 +76,19 @@
 
         <!-- Info Produk -->
         <div class="flex flex-col justify-center">
+          <!-- Header -->
+        <div class="flex items-center space-x-2 mb-4">
+            <div class="w-8 h-8 bg-gray-300 text-white rounded-full flex items-center justify-center text-sm font-bold">OP</div>
+            <span class="text-sm text-gray-600">(Header)</span>
+        </div>
           <h1 class="text-2xl font-bold mb-2"><%= item.title %></h1>
           <p class="text-xl text-green-600 font-semibold mb-4">Rp <%= Number(item.price).toLocaleString('id-ID') %></p>
 
-          <!-- Deskripsi -->
           <div class="border rounded p-4 bg-white text-gray-700 leading-relaxed mb-4 h-48 overflow-y-auto">
             <%= item.description %>
           </div>
 
           <div class="flex items-center space-x-4">
-            <!-- Masukkan Keranjang -->
             <form action="/keranjang/keranjang/add" method="POST">
               <input type="hidden" name="itemId" value="<%= item.id %>">
               <input type="hidden" name="quantity" value="1">
@@ -69,8 +97,6 @@
                 Masukkan Keranjang
               </button>
             </form>
-
-            <!-- Beli Sekarang -->
             <form action="/keranjang/keranjang/add" method="POST">
               <input type="hidden" name="itemId" value="<%= item.id %>">
               <input type="hidden" name="quantity" value="1">
@@ -104,20 +130,9 @@
         <% }) %>
       </div>
     </section>
-
   </main>
 
   <%- include('../layout/footer') %>
 
-  <script>
-    function scrollCarousel(direction) {
-      const container = document.getElementById('carousel');
-      const slideWidth = container.clientWidth;
-      container.scrollBy({
-        left: direction * slideWidth,
-        behavior: 'smooth'
-      });
-    }
-  </script>
 </body>
 </html>

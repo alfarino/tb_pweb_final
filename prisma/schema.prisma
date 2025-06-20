@@ -309,7 +309,6 @@ model Notification {
 
   @@index([userId])
   @@index([isRead])
-  @@index([type])
   @@map("notifications")
 }
 
@@ -378,7 +377,6 @@ model UserBadge {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([badgeType])
   @@map("user_badges")
 }
 
@@ -484,50 +482,8 @@ enum StatusTransaksi {
 
 enum StatusPembayaran {
   UNPAID
-  PAID
-  REFUNDED
-  FAILED
-}
-
-enum BarterStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-  COMPLETED
   CANCELLED
-}
-
-enum WtbUrgency {
-  LOW
-  NORMAL
-  HIGH
-  URGENT
-}
-
-enum NotificationType {
-  ITEM_SOLD
-  ITEM_LIKED
-  BARTER_REQUEST
-  BARTER_ACCEPTED
-  BARTER_REJECTED
-  WTB_RESPONSE
-  PRICE_ALERT
-  DISCUSSION_REPLY
-  SYSTEM_ANNOUNCEMENT
-  DONATION_REQUEST
-  BADGE_EARNED
-  AN_ITEM_POST
-}
-
-enum BadgeType {
-  VERIFIED_STUDENT
-  TOP_SELLER
-  HELPFUL_MEMBER
-  ACTIVE_TRADER
-  GENEROUS_DONOR
-  DISCUSSION_LEADER
-  EARLY_ADOPTER
-  TRUSTED_MEMBER
+  DISPUTED
 }
 
 enum DonationUrgency {
@@ -559,4 +515,70 @@ enum RecommendationReason {
   BASED_ON_LOCATION
   BASED_ON_ACADEMIC_INTEREST
   POPULAR_ITEM
+}
+
+enum BarterStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum WtbUrgency {
+  NORMAL
+  URGENT
+}
+
+enum NotificationType {
+  TRANSACTION
+  MESSAGE
+  WARNING
+}
+
+enum BadgeType {
+  TRUSTED
+  FAST_RESPONDER
+  VERIFIED
+}
+
+enum barter_requests_status {
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum notifications_type {
+  ITEM_SOLD
+  ITEM_LIKED
+  BARTER_REQUEST
+  BARTER_ACCEPTED
+  BARTER_REJECTED
+  WTB_RESPONSE
+  PRICE_ALERT
+  DISCUSSION_REPLY
+  SYSTEM_ANNOUNCEMENT
+  DONATION_REQUEST
+  BADGE_EARNED
+  AN_ITEM_POST
+}
+
+enum transaksi_statusBayar {
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum user_badges_badgeType {
+  VERIFIED_STUDENT
+  TOP_SELLER
+  HELPFUL_MEMBER
+  ACTIVE_TRADER
+  GENEROUS_DONOR
+  DISCUSSION_LEADER
+  EARLY_ADOPTER
+  TRUSTED_MEMBER
+}
+
+enum wtb_requests_urgency {
+  LOW
+  HIGH
 }
