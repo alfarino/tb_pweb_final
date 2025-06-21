@@ -114,66 +114,6 @@ exports.renderAddForm = (req, res) => {
   });
 };
 
-exports.addItem = async (req, res) => {
-  try {
-    const { title, description, price, category, condition, conditionDetail, location } = req.body;
-    const userId = req.session.user.id;
-
-    // Validasi: gambar utama harus ada
-    if (!req.files?.primaryImage || req.files.primaryImage.length === 0) {
-      return res.status(400).send("Gambar utama wajib diisi.");
-    }
-
-    const newItem = await prisma.item.create({
-      data: {
-        userId,
-        title,
-        description,
-        price: parseFloat(price),
-        category,
-        condition,
-        conditionDetail,
-        location,
-        isActive: true,
-        isAvailable: true
-      }
-    });
-
-    const files = req.files || {};
-
-    // Simpan gambar utama
-    await prisma.itemImage.create({
-      data: {
-        itemId: newItem.id,
-        imageUrl: files.primaryImage[0].path,
-        isPrimary: true,
-        sortOrder: 0
-      }
-    });
-
-    // Simpan gambar tambahan (jika ada)
-    if (files.additionalImages && files.additionalImages.length > 0) {
-      await Promise.all(
-        files.additionalImages.map((file, idx) =>
-          prisma.itemImage.create({
-            data: {
-              itemId: newItem.id,
-              imageUrl: file.path,
-              isPrimary: false,
-              sortOrder: idx + 1
-            }
-          })
-        )
-      );
-    }
-
-    res.redirect('/profile/product');
-  } catch (err) {
-    console.error('Gagal menambahkan item:', err);
-    res.status(500).send('Terjadi kesalahan saat menambahkan produk.');
-  }
-};
-
 // Ambil data riwayat pembelian user
 exports.getRiwayatPembelian = async (req, res) => {
   try {
@@ -207,6 +147,70 @@ exports.getRiwayatPembelian = async (req, res) => {
     res.status(500).send('Terjadi kesalahan saat mengambil riwayat pembelian');
   }
 };
+
+exports.addItem = async (req, res) => {
+  try {
+    const {
+      title, description, price, category,
+      condition, conditionDetail, location
+    } = req.body;
+
+    const userId = req.session.user.id;
+
+    // Validasi: gambar utama harus ada
+    if (!req.files?.primaryImage || req.files.primaryImage.length === 0) {
+      return res.status(400).send("Gambar utama wajib diisi.");
+    }
+
+    const newItem = await prisma.item.create({
+      data: {
+        userId,
+        title,
+        description,
+        price: parseFloat(price),
+        category,
+        condition,
+        conditionDetail,
+        location,
+        isActive: true,
+        isAvailable: true
+      }
+    });
+
+    const files = req.files || {};
+    let sortOrder = 0;
+
+    // Simpan gambar utama di sortOrder: 0
+    await prisma.itemImage.create({
+      data: {
+        itemId: newItem.id,
+        imageUrl: files.primaryImage[0].path,
+        isPrimary: true,
+        sortOrder: sortOrder++
+      }
+    });
+
+    // Simpan gambar tambahan dimulai dari sortOrder: 1, 2, ...
+    if (files.additionalImages?.length) {
+      for (const file of files.additionalImages) {
+        await prisma.itemImage.create({
+          data: {
+            itemId: newItem.id,
+            imageUrl: file.path,
+            isPrimary: false,
+            sortOrder: sortOrder++
+          }
+        });
+      }
+    }
+
+    res.redirect('/profile/product');
+  } catch (err) {
+    console.error('Gagal menambahkan item:', err);
+    res.status(500).send('Terjadi kesalahan saat menambahkan produk.');
+  }
+};
+
 
 // 🔧 GET Edit Item Page
 exports.getEditItem = async (req, res) => {
