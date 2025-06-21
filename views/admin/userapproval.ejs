@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Approval Pengguna - Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Navbar -->
+  <%- include('adminnavbar') %>
+
+  <!-- Konten Utama -->
+  <main class="max-w-6xl mx-auto py-10 px-4">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Daftar Pengguna Menunggu Persetujuan</h1>
+
+    <% if (users.length === 0) { %>
+      <div class="text-center text-gray-500">Tidak ada pendaftar baru saat ini.</div>
+    <% } else { %>
+      <div class="grid gap-6">
+        <% users.forEach(user => { %>
+          <div class="bg-white p-6 rounded-xl shadow flex flex-col md:flex-row justify-between items-start md:items-center">
+            <!-- Informasi Pengguna -->
+            <div>
+              <p class="text-lg font-semibold"><%= user.fullName %></p>
+              <p class="text-gray-600 text-sm">Email: <%= user.email %></p>
+              <p class="text-gray-600 text-sm">NIM: <%= user.studentId || '-' %></p>
+              <p class="text-gray-600 text-sm">Fakultas: <%= user.faculty || '-' %> | Jurusan: <%= user.major || '-' %></p>
+            </div>
+
+            <!-- Tombol Aksi -->
+            <div class="flex flex-col md:flex-row gap-2 mt-4 md:mt-0">
+              <form action="/admin/users/approve/<%= user.id %>" method="POST">
+                <button type="submit"
+                  class="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg transition">
+                  Setujui
+                </button>
+              </form>
+              <form action="/admin/users/reject/<%= user.id %>" method="POST">
+                <button type="submit"
+                  class="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2 rounded-lg transition">
+                  Tolak
+                </button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </main>
+
+  <!-- Footer -->
+  <%- include('../layout/footer') %>
+</body>
+</html>

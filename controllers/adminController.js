@@ -1,5 +1,7 @@
 // controllers/adminController.js
 const prisma = require('../prisma/client');
+const { generateUsername, generatePassword } = require('../utils/generateCred');
+const { sendAccountEmailToUser, sendRejectionEmail } = require('../utils/mailer');
 
 exports.getAdminDashboard = async (req, res) => {
   const pendingItems = await prisma.item.count({ where: { approvalStatus: 'pending' } });
@@ -105,4 +107,58 @@ exports.updateAdminProfile = async (req, res) => {
 
   req.session.success = "Profil admin berhasil diperbarui!";
   res.redirect('/admin/profile');
+};
+
+exports.getUserApprovalList = async (req, res) => {
+  const users = await prisma.user.findMany({
+    where: { isApproved: false },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  res.render('admin/userapproval', { users });
+};
+
+exports.approveUser = async (req, res) => {
+  const userId = parseInt(req.params.id);
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.isApproved) return res.redirect('/admin/users/approval');
+
+    const username = generateUsername(user.fullName);
+    const password = generatePassword();
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        username,
+        password,
+        isApproved: true,
+        approvedById: req.session.user.id,
+        approvedAt: new Date()
+      }
+    });
+
+    await sendAccountEmailToUser(user.email, user.fullName, username, password);
+    res.redirect('/admin/users/approval');
+  } catch (err) {
+    console.error('Approval Error:', err);
+    res.redirect('/admin/users/approval');
+  }
+};
+
+exports.rejectUser = async (req, res) => {
+  const userId = parseInt(req.params.id);
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.isApproved) return res.redirect('/admin/users/approval');
+
+    await sendRejectionEmail(user.email, user.fullName);
+
+    await prisma.user.delete({ where: { id: userId } });
+
+    res.redirect('/admin/users/approval');
+  } catch (err) {
+    console.error('Reject Error:', err);
+    res.redirect('/admin/users/approval');
+  }
 };
