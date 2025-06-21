@@ -91,7 +91,7 @@ model User {
     viewCount       Int              @default(0)
     favoriteCount   Int              @default(0)
     isActive        Boolean          @default(true)
-    approvalStatus String @default("pending") // pending | approved | rejected
+    approvalStatus  ApprovalStatus @default(pending)
     approvedAt     DateTime?
     approvedById   Int?
     approvedBy     User?  @relation("ApprovedBy", fields: [approvedById], references: [id])
