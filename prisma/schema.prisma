@@ -38,6 +38,10 @@ model User {
   profileImage          String?
   isVerified            Boolean @default(false)
   isAdmin               Boolean @default(false) // ✅ Tambahan ini
+  isApproved   Boolean  @default(false)
+  approvedAt   DateTime?
+  approvedById Int?
+  approvedBy   User? @relation("UserApprovedBy", fields: [approvedById], references: [id])
   isActive              Boolean @default(true)
   verificationToken     String?
   resetPasswordToken    String?
@@ -64,6 +68,8 @@ model User {
   recommendations       Recommendation[]
   academicPreferences   AcademicPreference[]
   carts                 Cart[]
+  approvedUsers         User[] @relation("UserApprovedBy") // ⬅️ relasi balik (user yang dia approve)
+  approvedItems         Item[] @relation("ApprovedBy") // ⬅️ relasi balik ke Item
 
   @@map("users")
 }
@@ -85,6 +91,10 @@ model User {
     viewCount       Int              @default(0)
     favoriteCount   Int              @default(0)
     isActive        Boolean          @default(true)
+    approvalStatus String @default("pending") // pending | approved | rejected
+    approvedAt     DateTime?
+    approvedById   Int?
+    approvedBy     User?  @relation("ApprovedBy", fields: [approvedById], references: [id])
     createdAt       DateTime         @default(now())
     updatedAt       DateTime         @updatedAt
     // Relations
@@ -472,6 +482,12 @@ enum ItemCondition {
   GOOD
   FAIR
   POOR
+}
+
+enum ApprovalStatus {
+  pending
+  approved
+  rejected
 }
 
 enum StatusTransaksi {
