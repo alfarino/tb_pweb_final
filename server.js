@@ -58,7 +58,7 @@ app.use(flashMiddleware);
 app.use("/items", requireLogin, itemRoutes);
 app.use('/keranjang', requireLogin, cartRoutes);
 app.use("/profile", requireLogin, profileRoutes);
-app.use("/want-to-buy", requireLogin, wtbRoutes);
+app.use("/wtb", requireLogin, wtbRoutes);
 
 // ✅ Admin Routes (dengan login & admin check)
 app.use('/admin', requireLogin, requireAdmin, adminRoutes);

@@ -1,14 +1,15 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// Fungsi untuk menampilkan halaman WTB (membaca produk)
 const getWantToBuyPage = async (req, res) => {
   try {
+    console.log("📥 Masuk ke getWantToBuyPage controller");
     const products = await prisma.product.findMany();
+    console.log("📦 Produk:", products);
     res.render("wtb/wtb", { products });
   } catch (error) {
-    console.error("Error fetching products:", error);
-    res.render("wtb/wtb", { products: [] }); // Jika error, kirim array kosong
+    console.error("❌ Error fetching products:", error);
+    res.render("wtb/wtb", { products: [] });
   }
 };
 
@@ -32,7 +33,7 @@ const createWtbRequest = async (req, res) => {
     });
 
     // Redirect ke halaman WTB setelah posting berhasil
-    res.redirect('/want-to-buy'); // Atau arahkan ke halaman yang sesuai
+    res.redirect('wtb/wtb'); // Atau arahkan ke halaman yang sesuai
   } catch (error) {
     console.error("Error creating WTB request:", error);
     res.status(500).json({ error: "Failed to create WTB request" });
