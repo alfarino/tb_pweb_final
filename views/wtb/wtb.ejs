@@ -5,43 +5,165 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Want to Buy</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script>
+    // Fungsi untuk menampilkan konten sesuai dengan menu yang dipilih
+    function showContent(contentId, menuId) {
+      const contentSections = document.querySelectorAll('.content-section');
+      contentSections.forEach(section => {
+        section.style.display = 'none'; // Sembunyikan semua konten
+      });
+      document.getElementById(contentId).style.display = 'block'; // Tampilkan konten yang dipilih
+
+      // Hapus kelas 'active' dari semua menu
+      const menuItems = document.querySelectorAll('.menu-item');
+      menuItems.forEach(item => {
+        item.classList.remove('text-blue-500', 'underline');
+      });
+
+      // Tambahkan kelas 'active' pada menu yang dipilih
+      document.getElementById(menuId).classList.add('text-blue-500', 'underline');
+    }
+
+    // Menampilkan konten Beranda secara default
+    window.onload = function() {
+      showContent('beranda', 'berandaMenu');
+    }
+  </script>
 </head>
-<body class="bg-gray-100 flex flex-col min-h-screen"> <!-- Menambahkan flexbox dan min-h-screen -->
+<body class="bg-gray-100 flex flex-col min-h-screen">
 
   <!-- Navbar -->
   <%- include('layout/navbar') %>
 
-  <div class="container mx-auto mt-10 px-4 flex-grow">
-    <h1 class="text-3xl font-bold text-center mb-6">Mau cari apa?</h1>
+  <!-- Wrapper untuk padding besar -->
+  <div class="flex flex-1 px-64">
 
-    <!-- Jika tidak ada produk -->
-    <% if (products.length === 0) { %>
-      <div class="text-center p-6 border rounded-lg bg-white shadow-md">
-        <h2 class="text-xl font-semibold">Belum ada produk</h2>
-        <p>Segera tambahkan produk untuk memulai.</p>
+    <!-- Sidebar -->
+    <div class="w-64 bg-gray-800 text-white p-6">
+      <div class="flex flex-col mb-8">
+        <span class="ml-0 text-xl">Hallo</span>
+        <span class="ml-0 text-3xl mt-2">Mau cari apa?</span>
       </div>
-    <% } else { %>
-      <!-- Jika ada produk, tampilkan produk dalam grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <% products.forEach(product => { %>
-          <div class="bg-white p-4 rounded-lg shadow-md">
-            <div class="h-48 bg-gray-200 mb-4"></div>
-            <h3 class="font-semibold text-lg mb-2"><%= product.name %></h3>
-            <p class="text-gray-500 mb-2"><%= product.description %></p>
-            <div class="flex justify-between items-center">
-              <button class="bg-blue-500 text-white px-4 py-2 rounded">Beli</button>
-              <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded">Detail</button>
-            </div>
+      <!-- Menu Sidebar -->
+      <ul class="space-y-6">
+        <li>
+          <a href="javascript:void(0);" 
+             id="berandaMenu" 
+             class="menu-item text-gray-300 hover:text-white" 
+             onclick="showContent('beranda', 'berandaMenu')">Beranda</a>
+        </li>
+        <li>
+          <a href="javascript:void(0);" 
+             id="postSayaMenu" 
+             class="menu-item text-gray-300 hover:text-white" 
+             onclick="showContent('postSaya', 'postSayaMenu')">Post saya</a>
+        </li>
+        <li>
+          <a href="javascript:void(0);" 
+             id="komentarSayaMenu" 
+             class="menu-item text-gray-300 hover:text-white" 
+             onclick="showContent('komentarSaya', 'komentarSayaMenu')">Komentar saya</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Konten Utama -->
+    <div class="flex-1 bg-white p-6">
+      <!-- Beranda Content -->
+      <div id="beranda" class="content-section" style="display:none;">
+  <div class="max-w-3xl mx-auto">
+    <!-- Form Post -->
+    <form action="/want-to-buy/create" method="POST">
+      <div class="max-w-3xl mx-auto">
+      <!-- Flexbox untuk menampilkan Foto Profil dan Input Teks berdampingan -->
+      <div class="flex flex-col items-start space-y-4 bg-gray-100 p-6 rounded-lg shadow-sm">
+        <!-- Foto Profil -->
+        <button id="profileBtn" class="focus:outline-none">
+          <img src="/images/profil.jpg" alt="Foto Profil" class="w-12 h-12 rounded-full border-2 border-white shadow-md hover:scale-110 transition" />
+        </button>
+        
+        <!-- Formulir WTB -->
+        <div class="mb-4">
+          <label for="title" class="block text-sm font-semibold">Judul</label>
+            <input type="text" id="title" name="title" class="w-full p-3 border border-gray-300 rounded" required />
+        </div>
+
+        <div class="mb-4">
+          <label for="description" class="block text-sm font-semibold">Deskripsi</label>
+          <textarea id="description" name="description" class="w-full p-3 border border-gray-300 rounded" required></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label for="maxPrice" class="block text-sm font-semibold">Harga Maksimal</label>
+          <input type="number" id="maxPrice" name="maxPrice" class="w-full p-3 border border-gray-300 rounded" />
+        </div>
+
+        <div class="mb-4">
+          <label for="category" class="block text-sm font-semibold">Kategori</label>
+          <input type="text" id="category" name="category" class="w-full p-3 border border-gray-300 rounded" />
+        </div>
+
+        <div class="mb-4">
+          <label for="preferredCondition" class="block text-sm font-semibold">Kondisi yang Diinginkan</label>
+          <input type="text" id="preferredCondition" name="preferredCondition" class="w-full p-3 border border-gray-300 rounded" />
+        </div>
+
+        <div class="mb-4">
+          <label for="location" class="block text-sm font-semibold">Lokasi</label>
+          <input type="text" id="location" name="location" class="w-full p-3 border border-gray-300 rounded" />
+        </div>
+
+        <div class="mb-4">
+          <label for="urgency" class="block text-sm font-semibold">Urgensi</label>
+          <select id="urgency" name="urgency" class="w-full p-3 border border-gray-300 rounded">
+          <option value="NORMAL">Normal</option>
+          <option value="URGENT">Urgent</option>
+          </select>
+        </div>
+
+        <!-- Tombol dan Ikon berada di kanan bawah -->
+        <div class="flex items-center justify-end w-full mt-4 space-x-4">
+          <div class="flex space-x-4">
+            <!-- Ikon Gambar -->
+            <label for="image-upload" class="cursor-pointer text-blue-500 hover:text-blue-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+              </svg>
+            </label>
+            <input type="file" id="image-upload" class="hidden" />
           </div>
-        <% }); %>
+          
+          <!-- Tombol Post -->
+          <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            POST
+          </button>
+          </form>
+        </div>
       </div>
-    <% } %>
+    </div>
   </div>
+</div>
 
-  <!-- Tombol Tambah di Kanan Bawah -->
-  <a href="/add-item" class="fixed bottom-6 right-6 bg-green-600 text-white p-6 rounded-full shadow-lg hover:bg-green-700 transition duration-300 text-3xl flex justify-center items-center">
-    +
-  </a>
+
+      <!-- Post Saya Content -->
+      <div id="postSaya" class="content-section" style="display:none;">
+        <div class="max-w-3xl mx-auto">
+          <h1 class="text-2xl font-semibold mb-4">Post Saya</h1>
+          <p>Ini adalah halaman Post Saya.</p>
+        </div>
+      </div>
+
+      <!-- Komentar Saya Content -->
+      <div id="komentarSaya" class="content-section" style="display:none;">
+        <div class="max-w-3xl mx-auto">
+          <h1 class="text-2xl font-semibold mb-4">Komentar Saya</h1>
+          <p>Ini adalah halaman Komentar Saya.</p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
 
   <!-- Footer yang selalu di bawah -->
   <%- include('layout/footer') %>
