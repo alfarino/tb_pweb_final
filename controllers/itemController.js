@@ -1,6 +1,15 @@
-const prisma = require('../prisma/client'); // inisialisasi prisma client
-const { cloudinary } = require('../utils/cloudinary'); // pastikan cloudinary sudah diinisialisasi
+const prisma = require('../prisma/client');
+const { cloudinary } = require('../utils/cloudinary');
 
+// 🔍 Ambil public_id dari URL Cloudinary
+function getCloudinaryPublicId(url) {
+  if (!url || !url.includes('res.cloudinary.com')) return null;
+  const parts = url.split('/');
+  const fileName = parts.pop().split('.')[0];
+  return `campusexchange/items/${fileName}`;
+}
+
+// ✅ GET: Halaman detail item
 exports.getItemDetail = async (req, res) => {
   const itemId = parseInt(req.params.id);
 
@@ -40,6 +49,7 @@ exports.getItemDetail = async (req, res) => {
   }
 };
 
+// ✅ GET: Halaman utama (beranda)
 exports.getItemList = async (req, res) => {
   try {
     const items = await prisma.item.findMany({
@@ -54,6 +64,7 @@ exports.getItemList = async (req, res) => {
   }
 };
 
+// ✅ GET: Produk milik user
 exports.getUserProducts = async (req, res) => {
   try {
     const items = await prisma.item.findMany({
@@ -66,24 +77,21 @@ exports.getUserProducts = async (req, res) => {
       }
     });
 
-    console.log('Raw item images:', items.map(item => ({
-      id: item.id,
-      imageUrl: item.itemImages[0]?.imageUrl
-    })));
-
     const produk = items.map(item => ({
       id: item.id,
       title: item.title,
       price: parseFloat(item.price),
       status: item.status,
-      imageUrl: item.itemImages[0]?.imageUrl.trim() || null
+      imageUrl: item.itemImages[0]?.imageUrl?.trim() || null
     }));
 
-    console.log('Final image URLs:', produk.map(p => ({ id: p.id, imageUrl: p.imageUrl })));
+    const success = req.session.success;
+    delete req.session.success;
 
     res.render('profile/product', {
+      user: req.session.user,
       produk,
-      user: req.session.user
+      success
     });
   } catch (error) {
     console.error('[getUserProducts] Error:', error);
@@ -91,9 +99,10 @@ exports.getUserProducts = async (req, res) => {
   }
 };
 
+// ✅ GET: Profil user
 exports.getUserProfile = async (req, res) => {
   try {
-    const userId = 1; // Ganti dengan ID dari session nanti
+    const userId = req.session.user.id;
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
 
@@ -108,36 +117,28 @@ exports.getUserProfile = async (req, res) => {
   }
 };
 
+// ✅ GET: Form tambah produk
 exports.renderAddForm = (req, res) => {
-  res.render('items/add', {
-    user: req.session.user
-  });
+  res.render('items/add', { user: req.session.user });
 };
 
-// Ambil data riwayat pembelian user
+// ✅ GET: Riwayat pembelian
 exports.getRiwayatPembelian = async (req, res) => {
   try {
-    const userId = req.session.user?.id; // Ganti dengan session user ID sesungguhnya
-     if (!userId) return res.status(401).send('Unauthorized');
+    const userId = req.session.user?.id;
+    if (!userId) return res.status(401).send('Unauthorized');
 
     const pembelian = await prisma.transaksi.findMany({
-      where: {
-        pembeliId: userId
-      },
-      include: {
-        item: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      where: { pembeliId: userId },
+      include: { item: true },
+      orderBy: { createdAt: 'desc' }
     });
 
-    // Siapkan data untuk ditampilkan ke EJS
     const dataPembelian = pembelian.map(t => ({
       nama: t.item.nama,
       harga: t.item.harga,
       gambar: t.item.gambar,
-      tanggal_transaksi: t.tanggal_transaksi.toISOString().split('T')[0], // Format yyyy-mm-dd
+      tanggal_transaksi: t.tanggal_transaksi.toISOString().split('T')[0],
       status: t.status
     }));
 
@@ -148,6 +149,7 @@ exports.getRiwayatPembelian = async (req, res) => {
   }
 };
 
+// ✅ POST: Tambah produk
 exports.addItem = async (req, res) => {
   try {
     const {
@@ -157,7 +159,6 @@ exports.addItem = async (req, res) => {
 
     const userId = req.session.user.id;
 
-    // Validasi: gambar utama harus ada
     if (!req.files?.primaryImage || req.files.primaryImage.length === 0) {
       return res.status(400).send("Gambar utama wajib diisi.");
     }
@@ -180,7 +181,6 @@ exports.addItem = async (req, res) => {
     const files = req.files || {};
     let sortOrder = 0;
 
-    // Simpan gambar utama di sortOrder: 0
     await prisma.itemImage.create({
       data: {
         itemId: newItem.id,
@@ -190,7 +190,6 @@ exports.addItem = async (req, res) => {
       }
     });
 
-    // Simpan gambar tambahan dimulai dari sortOrder: 1, 2, ...
     if (files.additionalImages?.length) {
       for (const file of files.additionalImages) {
         await prisma.itemImage.create({
@@ -204,6 +203,7 @@ exports.addItem = async (req, res) => {
       }
     }
 
+    req.session.success = "Produk berhasil ditambahkan!";
     res.redirect('/profile/product');
   } catch (err) {
     console.error('Gagal menambahkan item:', err);
@@ -211,8 +211,7 @@ exports.addItem = async (req, res) => {
   }
 };
 
-
-// 🔧 GET Edit Item Page
+// ✅ GET: Halaman edit
 exports.getEditItem = async (req, res) => {
   const itemId = parseInt(req.params.id);
   const item = await prisma.item.findUnique({
@@ -227,11 +226,11 @@ exports.getEditItem = async (req, res) => {
   res.render('items/edit', {
     item,
     user: req.session.user,
-    removedImageIds: [] // supaya tidak error di EJS saat render awal
+    removedImageIds: []
   });
 };
 
-// 🔧 POST Update Item
+// ✅ POST: Update produk
 exports.updateItem = async (req, res) => {
   const itemId = parseInt(req.params.id);
   const existingItem = await prisma.item.findUnique({
@@ -249,7 +248,6 @@ exports.updateItem = async (req, res) => {
     removedImageIds = [],
   } = req.body;
 
-  // 🗑️ Hapus gambar yang ditandai untuk dihapus (baik di DB maupun Cloudinary)
   const imageIdsToRemove = (Array.isArray(removedImageIds) ? removedImageIds : [removedImageIds])
     .map(id => parseInt(id))
     .filter(id => !isNaN(id));
@@ -263,7 +261,6 @@ exports.updateItem = async (req, res) => {
     }
   }
 
-  // 📝 Update data utama produk
   await prisma.item.update({
     where: { id: itemId },
     data: {
@@ -279,37 +276,23 @@ exports.updateItem = async (req, res) => {
 
   const files = req.files || {};
 
-  // 📷 Jika ada gambar utama baru, hapus yang lama dan simpan yang baru
   if (files.primaryImage?.[0]) {
-    // Hapus semua gambar isPrimary: true
-    await prisma.itemImage.deleteMany({
-      where: { itemId, isPrimary: true }
-    });
-
-    // 🚫 Pastikan tidak ada tambahan lain yang pakai sortOrder 0 (untuk hindari bentrok unique)
+    await prisma.itemImage.deleteMany({ where: { itemId, isPrimary: true } });
     await prisma.itemImage.updateMany({
-      where: {
-        itemId,
-        isPrimary: false,
-        sortOrder: 0,
-      },
-      data: {
-        sortOrder: 1000, // sementara, nanti dirapikan di bawah
-      }
+      where: { itemId, isPrimary: false, sortOrder: 0 },
+      data: { sortOrder: 1000 }
     });
 
-    // Simpan gambar utama baru
     await prisma.itemImage.create({
       data: {
         itemId,
         imageUrl: files.primaryImage[0].path,
         isPrimary: true,
-        sortOrder: 0,
+        sortOrder: 0
       }
     });
   }
 
-  // ➕ Tambah gambar tambahan (jika ada)
   let currentCount = await prisma.itemImage.count({ where: { itemId } });
   let nextSort = currentCount;
 
@@ -320,19 +303,18 @@ exports.updateItem = async (req, res) => {
           itemId,
           imageUrl: file.path,
           isPrimary: false,
-          sortOrder: nextSort++,
+          sortOrder: nextSort++
         }
       });
     }
   }
 
-  // 🔢 Rapikan ulang sortOrder agar rapi 0,1,2,... (utama tetap di urutan pertama)
   const allImages = await prisma.itemImage.findMany({
     where: { itemId },
     orderBy: [
-      { isPrimary: 'desc' }, // primary di atas
-      { sortOrder: 'asc' },
-    ],
+      { isPrimary: 'desc' },
+      { sortOrder: 'asc' }
+    ]
   });
 
   for (let i = 0; i < allImages.length; i++) {
@@ -342,14 +324,31 @@ exports.updateItem = async (req, res) => {
     });
   }
 
+  req.session.success = "Produk berhasil diperbarui!";
   res.redirect('/profile/product');
 };
 
-// 🔍 Ambil public_id dari URL Cloudinary
-function getCloudinaryPublicId(url) {
-  if (!url || !url.includes('res.cloudinary.com')) return null;
-  const parts = url.split('/');
-  const fileName = parts.pop().split('.')[0];
-  return `campusexchange/items/${fileName}`;
-}
+// ✅ DELETE: Hapus produk
+exports.deleteItem = async (req, res) => {
+  const itemId = parseInt(req.params.id);
+  const userId = req.session.user.id;
 
+  const item = await prisma.item.findUnique({
+    where: { id: itemId },
+    include: { itemImages: true }
+  });
+
+  if (!item || item.userId !== userId) {
+    return res.status(403).send("Akses ditolak");
+  }
+
+  for (const image of item.itemImages) {
+    const publicId = getCloudinaryPublicId(image.imageUrl);
+    if (publicId) await cloudinary.uploader.destroy(publicId).catch(() => {});
+  }
+
+  await prisma.item.delete({ where: { id: itemId } });
+
+  req.session.success = "Produk berhasil dihapus!";
+  res.redirect('/profile/product');
+};

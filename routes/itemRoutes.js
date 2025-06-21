@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const itemController = require('../controllers/itemController');
 const { upload } = require('../utils/cloudinary');
+const { requireLogin } = require('../middleware/auth');
 
 // ✨ Tambahkan dukungan upload multiple image
 const multerFields = upload.fields([
@@ -16,6 +17,9 @@ router.post('/add', multerFields, itemController.addItem);
 // ✨ Form Edit Produk
 router.get('/edit/:id', itemController.getEditItem);
 router.post('/edit/:id', multerFields, itemController.updateItem);
+
+// Hapus Produk
+router.get('/hapus/:id', requireLogin, itemController.deleteItem);
 
 // 📦 Produk milik user
 router.get('/user-products', itemController.getUserProducts);

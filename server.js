@@ -46,6 +46,9 @@ app.use((req, res, next) => {
   next();
 });
 
+const flashMiddleware = require('./middleware/flash');
+app.use(flashMiddleware);
+
 // ✅ Gunakan Routes
 app.use("/items", requireLogin, itemRoutes);
 app.use('/keranjang', requireLogin, cartRoutes);
