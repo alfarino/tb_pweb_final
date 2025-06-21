@@ -4,48 +4,51 @@
   <title>Halaman Utama</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-white text-gray-800"> <!-- bg-black-500 diubah ke white agar valid -->
+<body class="bg-white text-gray-800 min-h-screen flex flex-col"> <!-- bg-black-500 diubah ke white agar valid -->
 
 <%- include('layout/navbar') %>
 
-<!-- Banner -->
-<div class="container mx-auto px-4 mt-5">
-  <div class="bg-green-600 h-96 rounded shadow-lg mb-4 flex justify-center items-center text-white text-xl">
-    Banner Besar
-  </div>
-</div>
+<main class="flex-grow">
+      <!-- Banner -->
+      <div class="container mx-auto px-4 mt-5">
+        <div class="bg-green-600 h-96 rounded shadow-lg mb-4 flex justify-center items-center text-white text-xl">
+          Banner Besar
+        </div>
+      </div>
 
-<!-- Fitur/Kategori -->
-<div class="container mx-auto grid grid-cols-7 gap-4 px-4 mb-4">
-  <% for (let i = 0; i < 7; i++) { %>
-    <% if (i === 0) { %> <!-- Ubah elemen pertama menjadi tombol "WTB" -->
-      <a href="/want-to-buy" class="bg-green-600 h-16 rounded-lg shadow flex justify-center items-center text-white font-semibold hover:bg-green-700 transition duration-300">
-        WTB
-      </a>
-    <% } else { %>
-      <div class="bg-green-600 h-16 rounded-lg shadow"></div>
-    <% } %>
-  <% } %>
-</div>
-
-
-<!-- Produk Grid -->
-<div class="container mx-auto grid grid-cols-7 gap-4 px-4 mb-4">
-  <% items.forEach(item => { %>
-    <a href="/items/<%= item.id %>" class="block bg-white rounded-lg shadow hover:shadow-xl hover:-translate-y-1 transition duration-300 overflow-hidden">
-      <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
-        <% if (item.itemImages && item.itemImages.length > 0) { %>
-         <img src="<%= item.itemImages[0]?.imageUrl %>" class="w-full h-full object-cover" /> 
-        <% } else { %>
-          <span class="text-gray-400 text-sm">No Image</span>
+      <!-- Fitur/Kategori -->
+      <div class="container mx-auto grid grid-cols-7 gap-4 px-4 mb-4">
+        <% for (let i = 0; i < 7; i++) { %>
+          <% if (i === 0) { %> <!-- Ubah elemen pertama menjadi tombol "WTB" -->
+            <a href="/views/wtb/wtb" class="bg-green-600 h-16 rounded-lg shadow flex justify-center items-center text-white font-semibold hover:bg-green-700 transition duration-300">
+              WTB
+            </a>
+          <% } else { %>
+            <div class="bg-green-600 h-16 rounded-lg shadow"></div>
+          <% } %>
         <% } %>
       </div>
-      <div class="bg-gray-100 p-2 text-center text-sm font-semibold truncate">
-        <%= item.title %>
+
+
+      <!-- Produk Grid -->
+      <div class="container mx-auto grid grid-cols-7 gap-4 px-4 mb-4">
+        <% items.forEach(item => { %>
+          <a href="/items/<%= item.id %>" class="block bg-white rounded-lg shadow hover:shadow-xl hover:-translate-y-1 transition duration-300 overflow-hidden">
+            <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
+              <% if (item.itemImages && item.itemImages.length > 0) { %>
+              <img src="<%= item.itemImages[0]?.imageUrl %>" class="w-full h-full object-cover" /> 
+              <% } else { %>
+                <span class="text-gray-400 text-sm">No Image</span>
+              <% } %>
+            </div>
+            <div class="bg-gray-100 p-2 text-center text-sm font-semibold truncate">
+              <%= item.title %>
+            </div>
+          </a>
+        <% }) %>
       </div>
-    </a>
-  <% }) %>
-</div>
+
+</main>
 
 <%- include('layout/footer') %>
 </body>
