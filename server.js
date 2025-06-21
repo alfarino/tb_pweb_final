@@ -1,6 +1,7 @@
 // ✅ Import Core Modules
 const express = require("express");
 const session = require("express-session");
+const flash = require('connect-flash');
 const path = require("path");
 
 // ✅ Inisialisasi Express
@@ -25,6 +26,7 @@ const profileRoutes = require("./routes/profileRoutes");
 const cartRoutes = require("./routes/keranjangRoutes");
 const wtbRoutes = require("./routes/wtbRoutes");
 const adminRoutes = require('./routes/adminRoutes');
+const checkoutRoutes = require('./routes/checkoutRoutes');
 
 // ✅ View Engine Setup
 app.set("view engine", "ejs");
@@ -45,6 +47,13 @@ app.use(session({
   saveUninitialized: false,
 }));
 
+
+app.use(flash());
+app.use((req, res, next) => {
+  res.locals.errorMessage = req.flash('error');
+  next();
+});
+
 // ✅ Inject user ke semua view
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
@@ -63,6 +72,7 @@ app.use("/items", requireLogin, itemRoutes);
 app.use('/keranjang', requireLogin, cartRoutes);
 app.use("/profile", requireLogin, profileRoutes);
 app.use("/wtb", requireLogin, wtbRoutes);
+app.use('/checkout', checkoutRoutes);
 
 // ✅ Admin Routes (dengan login & admin check)
 app.use('/admin', requireLogin, requireAdmin, adminRoutes);

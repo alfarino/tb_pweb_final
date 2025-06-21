@@ -72,7 +72,23 @@ exports.addToCart = async (req, res) => {
     const itemIdInt = parseInt(itemId);
     const quantityInt = parseInt(quantity) || 1;
     
-    // Cek apakah item sudah ada di keranjang user
+     // ✅ Ambil data item dulu, termasuk userId pemiliknya
+    const item = await prisma.item.findUnique({
+      where: { id: itemIdInt },
+      select: { userId: true } // hanya ambil userId pemilik
+    });
+
+    if (!item) {
+      return res.status(404).send('Barang tidak ditemukan');
+    }
+
+    // ❌ Cek apakah user mencoba membeli barang milik sendiri
+    if (item.userId === userId) {
+      req.flash('error', 'Tidak dapat membeli atau memasukkan barang milik sendiri ke keranjang');
+      return res.redirect('/items/' + itemIdInt); // redirect kembali ke halaman produk
+    }
+
+    // ✅ Lanjut jika bukan milik sendiri
     const existingCart = await prisma.cart.findFirst({
       where: {
         userId: userId,

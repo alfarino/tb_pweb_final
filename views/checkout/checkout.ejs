@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white min-h-screen flex flex-col">
+  <%- include('../layout/navbar') %>
+
+  <main class="flex-grow container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-semibold mb-6">Checkout</h1>
+
+    <form action="/checkout/process" method="POST" class="bg-gray-100 p-6 rounded-lg shadow">
+      <% if (carts && carts.length > 0) { %>
+        <% carts.forEach(cart => { %>
+          <!-- Item -->
+          <div class="bg-white p-4 rounded-md shadow mb-4">
+            <div class="flex gap-4">
+              <img src="<%= cart.item.itemImages[0]?.imageUrl || '/placeholder.png' %>" alt="Produk" class="w-24 h-24 object-cover rounded bg-gray-200">
+              <div class="flex-1">
+                <h2 class="text-lg font-bold"><%= cart.item.title %></h2>
+                <p class="text-green-600 font-semibold">Rp <%= Number(cart.item.price).toLocaleString('id-ID') %></p>
+                <p class="text-sm text-gray-600">Penjual: <%= cart.item.user.username %></p>
+              </div>
+            </div>
+
+            <!-- Hidden Input for each item -->
+            <input type="hidden" name="selectedItems[]" value="<%= cart.id %>">
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p class="text-red-600">Tidak ada item untuk checkout.</p>
+      <% } %>
+
+      <!-- Form -->
+      <div class="bg-white p-4 rounded-lg shadow mb-6 space-y-4">
+        <div>
+          <label for="jadwal" class="block mb-1 font-medium">Jadwal Transaksi</label>
+          <select name="jadwal" id="jadwal" required class="w-full border rounded px-3 py-2">
+            <option value="">Pilih tanggal</option>
+            <option value="2025-06-23">23 Juni 2025</option>
+            <option value="2025-06-24">24 Juni 2025</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="shift" class="block mb-1 font-medium">Shift Transaksi</label>
+          <select name="shift" id="shift" required class="w-full border rounded px-3 py-2">
+            <option value="">Pilih shift</option>
+            <option value="Pagi">Pagi</option>
+            <option value="Siang">Siang</option>
+            <option value="Malam">Malam</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="lokasi" class="block mb-1 font-medium">Lokasi COD</label>
+          <select name="lokasi" id="lokasi" required class="w-full border rounded px-3 py-2">
+            <option value="">Pilih lokasi</option>
+            <option value="PKM - Fakultas Teknologi Informasi">PKM - Fakultas Teknologi Informasi</option>
+            <option value="Kriya Mart - PKM Universitas Andalas">Kriya Mart - PKM Universitas Andalas</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Checkout button -->
+      <div class="text-right">
+        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full text-lg font-semibold transition">
+          Checkout
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <%- include('../layout/footer') %>
+</body>
+</html>

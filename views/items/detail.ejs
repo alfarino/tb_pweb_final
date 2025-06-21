@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title><%= item.title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
   window.addEventListener("DOMContentLoaded", () => {
     let currentSlide = 0;
@@ -34,6 +35,21 @@
 <body class="flex flex-col min-h-screen bg-white">
 
   <%- include('../layout/navbar') %>
+
+  <% if (errorMessage && errorMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: '<%= errorMessage[0] %>',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    </script>
+  <% } %>
+
 
   <main class="flex-1 p-6 max-w-6xl mx-auto">
     <!-- Produk -->
@@ -106,7 +122,7 @@
               <input type="hidden" name="itemId" value="<%= item.id %>">
               <input type="hidden" name="quantity" value="1">
               <input type="hidden" name="redirect" value="cart">
-              <button type="submit" class="bg-green-200 text-green-800 px-6 py-2 rounded-full hover:bg-green-300 transition font-semibold">
+              <button id="addToCartBtn" data-items-id="<%= item.id %>" type="submit" class="bg-green-200 text-green-800 px-6 py-2 rounded-full hover:bg-green-300 transition font-semibold">
                 Masukkan Keranjang
               </button>
             </form>

@@ -130,15 +130,23 @@ exports.getRiwayatPembelian = async (req, res) => {
 
     const pembelian = await prisma.transaksi.findMany({
       where: { pembeliId: userId },
-      include: { item: true },
+      include: {
+        item: {
+          include: { itemImages: true }
+        }
+      },
       orderBy: { createdAt: 'desc' }
     });
 
     const dataPembelian = pembelian.map(t => ({
-      nama: t.item.nama,
-      harga: t.item.harga,
-      gambar: t.item.gambar,
-      tanggal_transaksi: t.tanggal_transaksi.toISOString().split('T')[0],
+      nama: t.item?.title || 'Barang tidak tersedia',
+      jumlah: t.jumlah,
+      gambar: t.item?.itemImages?.[0]?.imageUrl || null,
+      tanggal_transaksi: t.createdAt
+        ? t.createdAt.toLocaleDateString('id-ID', {
+            day: 'numeric', month: 'long', year: 'numeric'
+          })
+        : 'Tanggal tidak tersedia',
       status: t.status
     }));
 
