@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Edit Produk - CampusExchange</title>
   <script src="https://cdn.tailwindcss.com"></script>
-    <script>
+  <!-- Script -->
+  <script>
     function toggleRiwayat() {
       const submenu = document.getElementById("riwayatSubmenu");
       const arrow = document.getElementById("arrow-icon");
@@ -13,23 +14,61 @@
       arrow.innerHTML = submenu.classList.contains("hidden") ? "&#9660;" : "&#9650;";
     }
 
-    function removeOldImage(index, imageId) {
-      const container = document.getElementById(`old-image-container-${index}`);
-      if (container) container.classList.add('hidden');
-
-      if (!document.querySelector(`input[type="hidden"][name="removedImageIds"][value="${imageId}"]`)) {
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'removedImageIds';
-        hiddenInput.value = imageId;
-        document.getElementById('editForm').appendChild(hiddenInput);
-      }
+    function handleImageChange(event, index) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.getElementById(`preview-${index}`);
+        const placeholder = document.getElementById(`placeholder-${index}`);
+        const removeBtn = document.getElementById(`remove-${index}`);
+        img.src = e.target.result;
+        img.classList.remove("hidden");
+        if (placeholder) placeholder.classList.add("hidden");
+        if (removeBtn) removeBtn.classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
     }
+
+    function removeImage(index) {
+      const img = document.getElementById(`preview-${index}`);
+      const placeholder = document.getElementById(`placeholder-${index}`);
+      const removeBtn = document.getElementById(`remove-${index}`);
+      img.src = "";
+      img.classList.add("hidden");
+      if (placeholder) placeholder.classList.remove("hidden");
+      if (removeBtn) removeBtn.classList.add("hidden");
+    }
+
+    function removeOldImage(index, imageId) {
+      const container = document.getElementById(`slot-${index}`);
+      container.innerHTML = `
+        <input type="file" name="${index === 0 ? 'primaryImage' : 'additionalImages'}" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="handleImageChange(event, '${index}')" />
+        <img id="preview-${index}" class="absolute w-full h-full object-cover hidden" />
+        <span id="placeholder-${index}" class="text-gray-400">+</span>
+        <button type="button" onclick="removeImage('${index}')" class="absolute top-1 right-1 bg-white text-red-600 rounded-full text-xs px-2 py-0.5 hidden z-20" id="remove-${index}">x</button>
+      `;
+
+      const hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.name = 'removedImageIds';
+      hiddenInput.value = imageId;
+      document.getElementById('editForm').appendChild(hiddenInput);
+    }
+
+    const form = document.getElementById('editForm');
+    form.addEventListener('submit', function (e) {
+      const primaryInput = document.querySelector('input[name="primaryImage"]');
+      const primaryImageExists = document.getElementById('preview-0')?.src || document.getElementById('old-preview-0')?.src;
+      if (!primaryImageExists && (!primaryInput || !primaryInput.files.length)) {
+        e.preventDefault();
+        alert("Gambar utama wajib diunggah (slot pertama).");
+      }
+    });
   </script>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
-  <!-- Header -->
   <%- include('../layout/navbar') %>
 
   <div class="flex flex-1">
@@ -74,30 +113,18 @@
         </div>
 
         <form id="editForm" action="/items/edit/<%= item.id %>" method="POST" enctype="multipart/form-data" class="space-y-6">
-
-          <!-- Nama Produk -->
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">Nama Produk</label>
-            <input name="title" value="<%= item.title %>" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
-          </div>
-
-          <!-- Deskripsi -->
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">Deskripsi</label>
-            <textarea name="description" rows="4" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500"><%= item.description %></textarea>
-          </div>
-
-          <!-- Harga -->
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">Harga (Rp)</label>
-            <input name="price" type="number" value="<%= item.price %>" min="0" step="0.01" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
-          </div>
-
-          <!-- Kategori -->
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">Kategori</label>
-            <input name="category" value="<%= item.category %>" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
-          </div>
+          <!-- Title, Description, etc -->
+          <% const fields = ['title', 'description', 'price', 'category', 'conditionDetail', 'location']; %>
+          <% fields.forEach(field => { %>
+            <div>
+              <label class="block text-gray-700 font-medium mb-1 capitalize"><%= field.replace(/([A-Z])/g, ' $1') %></label>
+              <% if (field === 'description') { %>
+                <textarea name="description" rows="4" required class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500"><%= item.description %></textarea>
+              <% } else { %>
+                <input name="<%= field %>" value="<%= item[field] %>" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" <%= field === 'price' ? 'type="number" min="0" step="0.01"' : '' %> required />
+              <% } %>
+            </div>
+          <% }); %>
 
           <!-- Kondisi -->
           <div>
@@ -108,38 +135,27 @@
             </select>
           </div>
 
-          <!-- Detail Kondisi -->
+          <!-- Upload Gambar Style Grid -->
           <div>
-            <label class="block text-gray-700 font-medium mb-1">Detail Kondisi</label>
-            <input name="conditionDetail" value="<%= item.conditionDetail %>" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
-          </div>
-
-          <!-- Lokasi -->
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">Lokasi</label>
-            <input name="location" value="<%= item.location %>" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
-          </div>
-
-          <!-- Gambar Lama -->
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">Gambar Saat Ini</label>
+            <label class="block text-gray-700 font-medium mb-2">Kelola Gambar Produk</label>
             <div class="grid grid-cols-3 gap-4">
-              <% item.itemImages.forEach((img, index) => { %>
-                <div id="old-image-container-<%= index %>" class="relative w-full aspect-square border rounded overflow-hidden bg-gray-100">
-                  <img id="old-preview-<%= index %>" src="<%= img.imageUrl %>" class="absolute w-full h-full object-cover" />
-                  <span class="absolute bottom-1 left-1 text-xs bg-white rounded px-1 z-20"><%= img.isPrimary ? 'Utama' : 'Tambahan' %></span>
-                  <button type="button" onclick="removeOldImage('<%= index %>', '<%= img.id %>')" class="absolute top-1 right-1 bg-white text-red-600 rounded-full text-xs px-2 py-0.5 z-20">x</button>
+              <% for (let i = 0; i < 6; i++) { 
+                const existing = item.itemImages[i];
+                const nameAttr = i === 0 ? 'primaryImage' : 'additionalImages';
+              %>
+                <div class="relative w-full aspect-square bg-gray-100 border rounded flex items-center justify-center overflow-hidden" id="slot-<%= i %>">
+                  <% if (existing && !removedImageIds?.includes(existing.id)) { %>
+                    <img src="<%= existing.imageUrl %>" id="preview-<%= i %>" class="absolute w-full h-full object-cover" />
+                    <span class="absolute bottom-1 left-1 text-xs bg-white rounded px-1 z-20"><%= existing.isPrimary ? 'Utama' : 'Tambahan' %></span>
+                    <button type="button" onclick="removeOldImage('<%= i %>', '<%= existing.id %>')" class="absolute top-1 right-1 bg-white text-red-600 rounded-full text-xs px-2 py-0.5 z-20">x</button>
+                  <% } else { %>
+                    <input type="file" name="<%= nameAttr %>" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="handleImageChange(event, '<%= i %>')" />
+                    <img id="preview-<%= i %>" class="absolute w-full h-full object-cover hidden" />
+                    <span id="placeholder-<%= i %>" class="text-gray-400">+</span>
+                    <button type="button" onclick="removeImage('<%= i %>')" class="absolute top-1 right-1 bg-white text-red-600 rounded-full text-xs px-2 py-0.5 hidden z-20" id="remove-<%= i %>">x</button>
+                  <% } %>
                 </div>
-              <% }) %>
-            </div>
-          </div>
-
-          <!-- Upload Gambar Baru -->
-          <div>
-            <label class="block text-gray-700 font-medium mb-2 mt-6">Tambah Gambar Baru</label>
-            <div class="space-y-4">
-              <input type="file" name="primaryImage" accept="image/*" class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
-              <input type="file" name="additionalImages" accept="image/*" multiple class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500" />
+              <% } %>
             </div>
           </div>
 
@@ -148,7 +164,6 @@
             <a href="/profile/product" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition">Batal</a>
             <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">Simpan Perubahan</button>
           </div>
-
         </form>
       </div>
     </main>
