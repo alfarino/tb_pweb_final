@@ -1,14 +1,30 @@
+// ✅ Import Core Modules
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
+
+// ✅ Inisialisasi Express
 const app = express();
 const PORT = 3000;
-
-const authController = require('./controllers/authController');
 
 // ✅ Prisma Client
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+
+// ✅ Import Middleware
+const { requireLogin, requireAdmin } = require('./middleware/auth');
+const flashMiddleware = require('./middleware/flash');
+
+// ✅ Import Controllers
+const authController = require('./controllers/authController');
+const itemController = require("./controllers/itemController");
+
+// ✅ Import Routes
+const itemRoutes = require("./routes/itemRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+const cartRoutes = require("./routes/keranjangRoutes");
+const wtbRoutes = require("./routes/wtbRoutes");
+const adminRoutes = require('./routes/adminRoutes');
 
 // ✅ View Engine Setup
 app.set("view engine", "ejs");
@@ -29,52 +45,34 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-// ✅ Middleware untuk memastikan pengguna sudah login
-function requireLogin(req, res, next) {
-  if (!req.session.user) {
-    return res.redirect("/login");  // Jika belum login, arahkan ke halaman login
-  }
-  next();  // Jika sudah login, lanjutkan ke route berikutnya
-}
-
-// ✅ Import Routes
-const itemRoutes = require("./routes/itemRoutes");
-const profileRoutes = require("./routes/profileRoutes");
-const cartRoutes = require('./routes/keranjangRoutes');
-const wtbRoutes = require("./routes/wtbRoutes");
-
+// ✅ Inject user ke semua view
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
   next();
 });
 
-const flashMiddleware = require('./middleware/flash');
+// ✅ Flash Middleware
 app.use(flashMiddleware);
 
-// ✅ Gunakan Routes
+// ✅ Protected Routes
 app.use("/items", requireLogin, itemRoutes);
 app.use('/keranjang', requireLogin, cartRoutes);
-app.use("/profile", requireLogin, profileRoutes); // Proteksi semua route profile
+app.use("/profile", requireLogin, profileRoutes);
 app.use("/want-to-buy", requireLogin, wtbRoutes);
 
-
-// ✅ Login Routes
-app.get("/login", authController.showLoginPage);
-app.post("/login", authController.login);
-
-// ✅ Logout Route
-app.get("/logout", authController.logout);
-
-// ✅ Admin Routes
-const { requireLogin, requireAdmin } = require('./middleware/auth');
+// ✅ Admin Routes (dengan login & admin check)
 app.use('/admin', requireLogin, requireAdmin, adminRoutes);
 
-// ✅ Beranda (Home)
-const itemController = require("./controllers/itemController");
+// ✅ Login & Logout Routes
+app.get("/login", authController.showLoginPage);
+app.post("/login", authController.login);
+app.get("/logout", authController.logout);
+
+// ✅ Home & Produk Saya
 app.get("/", requireLogin, itemController.getItemList);
 app.get("/product", requireLogin, itemController.getUserProducts);
 
-// ✅ Jalankan Server
+// ✅ Start Server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

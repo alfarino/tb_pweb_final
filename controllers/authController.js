@@ -41,8 +41,8 @@ exports.logout = (req, res) => {
   });
 };
 
-app.get("/logout", (req, res) => {
+exports.logout = (req, res) => {
   req.session.destroy(() => {
-    res.redirect("/login");
+    res.redirect('/login');
   });
-});
+};
