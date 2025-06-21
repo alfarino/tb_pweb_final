@@ -1,25 +1,28 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Untuk versi tanpa hash password
 exports.login = async (req, res) => {
   const { username, password } = req.body;
 
   try {
     const user = await prisma.user.findUnique({
-      where: { username: username },
+      where: { username },
     });
 
     if (!user || user.password !== password) {
       return res.render('auth/login', { error: 'Username atau password salah!' });
     }
 
-    // Simpan data user ke session
     req.session.user = {
       id: user.id,
       username: user.username,
       fullName: user.fullName,
+      isAdmin: user.isAdmin,
     };
+
+    if (user.isAdmin) {
+      return res.redirect('/admin/dashboard');
+    }
 
     res.redirect('/');
   } catch (err) {
@@ -37,3 +40,9 @@ exports.logout = (req, res) => {
     res.redirect('/login');
   });
 };
+
+app.get("/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.redirect("/login");
+  });
+});

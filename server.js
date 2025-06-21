@@ -4,6 +4,8 @@ const path = require("path");
 const app = express();
 const PORT = 3000;
 
+const authController = require('./controllers/authController');
+
 // ✅ Prisma Client
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
@@ -56,42 +58,15 @@ app.use("/profile", requireLogin, profileRoutes); // Proteksi semua route profil
 app.use("/want-to-buy", requireLogin, wtbRoutes);  // Menambahkan route untuk halaman "Want to Buy"
 
 // ✅ Login Routes
-app.get("/login", (req, res) => {
-  res.render("auth/login", { error: null });
-});
-
-app.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { username },
-    });
-
-    if (!user || user.password !== password) {
-      return res.render("auth/login", { error: "Username atau password salah!" });
-    }
-
-    // Simpan data user ke dalam session
-    req.session.user = {
-      id: user.id,
-      username: user.username,
-      fullName: user.fullName,
-    };
-
-    res.redirect("/");
-  } catch (error) {
-    console.error("Login error:", error);
-    res.render("auth/login", { error: "Terjadi kesalahan pada server." });
-  }
-});
+app.get("/login", authController.showLoginPage);
+app.post("/login", authController.login);
 
 // ✅ Logout Route
-app.get("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/login");
-  });
-});
+app.get("/logout", authController.logout);
+
+// ✅ Admin Routes
+const { requireLogin, requireAdmin } = require('./middleware/auth');
+app.use('/admin', requireLogin, requireAdmin, adminRoutes);
 
 // ✅ Beranda (Home)
 const itemController = require("./controllers/itemController");
