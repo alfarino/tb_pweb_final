@@ -87,10 +87,20 @@
 
         <!-- Notifikasi -->
         <% if (typeof success !== 'undefined' && success) { %>
-          <div id="notif" class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded text-center">
-            <%= success %>
-          </div>
+          <script>
+            document.addEventListener('DOMContentLoaded', function () {
+              Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '<%= success %>',
+                showConfirmButton: false,
+                timer: 1200,
+                timerProgressBar: true
+              });
+            });
+          </script>
         <% } %>
+
 
         <!-- Daftar Produk -->
         <% if (produk.length === 0) { %>
