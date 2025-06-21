@@ -8,7 +8,7 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
   <!-- Header -->
-  <div class="bg-green-600 h-6 w-full"></div>
+  <%- include('../layout/navbar') %>
 
   <div class="flex flex-1">
     <!-- Sidebar -->
@@ -41,7 +41,8 @@
           </button>
 
           <div id="riwayatSubmenu" class="ml-14 mt-1 space-y-1">
-            <a href="/riwayat/pembelian" class="block text-blue-600 font-semibold">Pembelian</a>
+            <a href="/profile/history-buy" class="block text-blue-600 font-semibold">Pembelian</a>
+            <br>
             <a href="/riwayat/penjualan" class="block text-gray-600 hover:text-blue-600">Penjualan</a>
           </div>
         </div>
