@@ -208,7 +208,7 @@ exports.addItem = async (req, res) => {
   } catch (err) {
     console.error('Gagal menambahkan item:', err);
     res.status(500).send('Terjadi kesalahan saat menambahkan produk.');
-  }
+  } 
 };
 
 // ✅ GET: Halaman edit
