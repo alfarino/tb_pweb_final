@@ -1,0 +1,48 @@
+<% const isRiwayat = currentUrl.startsWith('/profile/history-buy') || currentUrl.startsWith('/riwayat/penjualan'); %>
+
+<aside class="w-64 bg-white shadow-lg">
+  <!-- Header Profil -->
+  <div class="p-6 border-b border-gray-200">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 bg-black rounded-full"></div>
+      <span class="text-gray-700 font-semibold">
+        <%= user?.fullName || '(Nama Akun)' %>
+      </span>
+    </div>
+  </div>
+
+  <!-- Menu Navigasi -->
+  <nav class="mt-4 space-y-1">
+    <% if (user && user.isAdmin) { %>
+      <!-- Link Akun Admin -->
+        <a href="/admin/adminprofile"
+         class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
+                <%= currentUrl === '/admin/adminprofile' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
+        <span>👤</span>
+        <span>Akun Saya</span>
+        </a>
+
+        <a href="/admin/dashboard"
+           class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
+                  <%= currentUrl === '/admin/dashboard' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
+        <span>👤</span>
+        <span>Dashboard Admin</span>
+        </a>
+
+        <a href="/admin/item-approval"
+           class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
+                  <%= currentUrl === '/admin/item-approval' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
+        <span>👤</span>
+        <span>Approval Item</span>
+        </a>
+
+        <a href="/admin/user-approval"
+           class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
+                  <%= currentUrl === '/admin/user-approval' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
+        <span>👤</span>
+        <span>Approval Pengguna</span>
+        </a>
+      
+    <% } %>
+  </nav>
+</aside>

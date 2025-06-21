@@ -59,3 +59,45 @@ exports.approveUser = async (req, res) => {
   });
   res.redirect('/admin/user-approval');
 };
+
+exports.getAdminProfile = async (req, res) => {
+  try {
+    const adminId = req.session.user.id;
+
+    // Ambil data lengkap admin dari database
+    const admin = await prisma.user.findUnique({
+      where: { id: adminId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        fullName: true,
+        phoneNumber: true,
+        major: true,
+        isAdmin: true
+      }
+    });
+
+    // Render halaman dengan data admin lengkap
+    res.render('admin/admin-profile', { user: admin });
+  } catch (err) {
+    console.error('Gagal load admin profile:', err);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+exports.updateAdminProfile = async (req, res) => {
+  const { fullName, username } = req.body;
+  const userId = req.session.user.id;
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { fullName, username }
+  });
+
+  req.session.user.fullName = fullName;
+  req.session.user.username = username;
+
+  req.session.success = "Profil admin berhasil diperbarui!";
+  res.redirect('/admin/profile');
+};

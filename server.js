@@ -48,6 +48,7 @@ app.use(session({
 // ✅ Inject user ke semua view
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
+  res.locals.currentUrl = req.originalUrl; 
   next();
 });
 

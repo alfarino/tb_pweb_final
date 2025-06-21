@@ -11,5 +11,6 @@ router.post('/item-approval/:id/approve', adminController.approveItem);
 router.post('/item-approval/:id/reject', adminController.rejectItem);
 router.get('/user-approval', adminController.getUserApproval);
 router.post('/user-approval/:id/approve', adminController.approveUser);
+router.get('/adminprofile', adminController.getAdminProfile);
 
 module.exports = router;
