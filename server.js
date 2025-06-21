@@ -47,10 +47,13 @@ app.use(session({
 
 // ✅ Inject user ke semua view
 app.use((req, res, next) => {
-  res.locals.user = req.session.user;
-  res.locals.currentUrl = req.originalUrl; 
+  res.locals.user = req.session.user || null;
+  res.locals.currentUrl = req.originalUrl;
+  res.locals.success = req.session.success;
+  delete req.session.success;
   next();
 });
+
 
 // ✅ Flash Middleware
 app.use(flashMiddleware);
@@ -68,6 +71,10 @@ app.use('/admin', requireLogin, requireAdmin, adminRoutes);
 app.get("/login", authController.showLoginPage);
 app.post("/login", authController.login);
 app.get("/logout", authController.logout);
+
+// ✅ Auth Routes
+const authRoutes = require('./routes/authRoutes');
+app.use('/', authRoutes);
 
 // ✅ Home & Produk Saya
 app.get("/", requireLogin, itemController.getItemList);

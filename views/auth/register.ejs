@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Registrasi Mahasiswa - CampusExchange</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/src/output.css">
+</head>
+<body class="min-h-screen flex">
+
+  <!-- Bagian kiri -->
+  <div class="w-2/3 bg-green-600 hidden lg:block"></div>
+
+  <!-- Bagian kanan -->
+  <div class="w-full lg:w-1/3 flex items-center justify-center bg-white p-8">
+    <div class="w-full max-w-sm bg-green-600 p-8 rounded-2xl shadow-lg">
+      <h2 class="text-white text-2xl font-bold text-center mb-6">Lengkapi Data Mahasiswa</h2>
+
+      <!-- Notifikasi -->
+      <% if (error) { %>
+        <div class="bg-red-100 text-red-700 p-2 mb-4 rounded text-sm text-center">
+          <%= error %>
+        </div>
+      <% } %>
+      <% if (success) { %>
+        <div class="bg-green-100 text-green-700 p-2 mb-4 rounded text-sm text-center">
+          <%= success %>
+        </div>
+      <% } %>
+
+      <form action="/register" method="POST" class="space-y-4">
+        <input type="email" name="email" placeholder="Email (sudah terdaftar)"
+          class="w-full px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white placeholder-gray-200 text-gray-800" required />
+
+        <input type="text" name="fullName" placeholder="Nama Lengkap"
+          class="w-full px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white placeholder-gray-200 text-gray-800" required />
+
+        <input type="text" name="studentId" placeholder="NIM"
+          class="w-full px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white placeholder-gray-200 text-gray-800" required />
+
+        <input type="text" name="university" placeholder="Universitas"
+          class="w-full px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white placeholder-gray-200 text-gray-800" />
+
+        <input type="text" name="faculty" placeholder="Fakultas"
+          class="w-full px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white placeholder-gray-200 text-gray-800" />
+
+        <input type="text" name="major" placeholder="Jurusan"
+          class="w-full px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white placeholder-gray-200 text-gray-800" />
+
+        <input type="text" name="phoneNumber" placeholder="No. HP"
+          class="w-full px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white placeholder-gray-200 text-gray-800" />
+
+        <button type="submit"
+          class="w-full bg-white text-green-700 font-semibold py-2 rounded-full hover:bg-gray-200 transition">
+          Kirim Pendaftaran
+        </button>
+      </form>
+
+      <!-- Tombol kembali ke login -->
+      <div class="mt-4 text-center text-white text-sm">
+        Sudah punya akun? <a href="/login" class="underline hover:text-gray-200">Login di sini</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

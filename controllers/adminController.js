@@ -26,6 +26,8 @@ exports.approveItem = async (req, res) => {
       approvedById: req.session.user.id
     }
   });
+
+  req.session.success = 'Produk berhasil disetujui.';
   res.redirect('/admin/item-approval');
 };
 
@@ -39,8 +41,11 @@ exports.rejectItem = async (req, res) => {
       approvedById: req.session.user.id
     }
   });
+
+  req.session.success = 'Produk telah ditolak.';
   res.redirect('/admin/item-approval');
 };
+
 
 exports.getUserApproval = async (req, res) => {
   const users = await prisma.user.findMany({ where: { isApproved: false, isAdmin: false } });
