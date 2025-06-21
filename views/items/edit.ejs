@@ -139,23 +139,34 @@
           <div>
             <label class="block text-gray-700 font-medium mb-2">Kelola Gambar Produk</label>
             <div class="grid grid-cols-3 gap-4">
-              <% for (let i = 0; i < 6; i++) { 
-                const existing = item.itemImages[i];
-                const nameAttr = i === 0 ? 'primaryImage' : 'additionalImages';
-              %>
-                <div class="relative w-full aspect-square bg-gray-100 border rounded flex items-center justify-center overflow-hidden" id="slot-<%= i %>">
-                  <% if (existing && !removedImageIds?.includes(existing.id)) { %>
-                    <img src="<%= existing.imageUrl %>" id="preview-<%= i %>" class="absolute w-full h-full object-cover" />
-                    <span class="absolute bottom-1 left-1 text-xs bg-white rounded px-1 z-20"><%= existing.isPrimary ? 'Utama' : 'Tambahan' %></span>
-                    <button type="button" onclick="removeOldImage('<%= i %>', '<%= existing.id %>')" class="absolute top-1 right-1 bg-white text-red-600 rounded-full text-xs px-2 py-0.5 z-20">x</button>
-                  <% } else { %>
-                    <input type="file" name="<%= nameAttr %>" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="handleImageChange(event, '<%= i %>')" />
-                    <img id="preview-<%= i %>" class="absolute w-full h-full object-cover hidden" />
-                    <span id="placeholder-<%= i %>" class="text-gray-400">+</span>
-                    <button type="button" onclick="removeImage('<%= i %>')" class="absolute top-1 right-1 bg-white text-red-600 rounded-full text-xs px-2 py-0.5 hidden z-20" id="remove-<%= i %>">x</button>
-                  <% } %>
-                </div>
-              <% } %>
+              <% for (let i = 0; i < 6; i++) {
+                  let existing;
+                  let nameAttr;
+
+                  if (i === 0) {
+                    // Slot pertama = khusus gambar utama
+                    existing = item.itemImages.find(img => img.isPrimary);
+                    nameAttr = 'primaryImage';
+                  } else {
+                    // Slot berikutnya = gambar tambahan berdasarkan urutan
+                    existing = item.itemImages.filter(img => !img.isPrimary)[i - 1];
+                    nameAttr = 'additionalImages';
+                  }
+                %>
+                  <div class="relative w-full aspect-square bg-gray-100 border rounded flex items-center justify-center overflow-hidden" id="slot-<%= i %>">
+                    <% if (existing && !removedImageIds?.includes(existing.id)) { %>
+                      <img src="<%= existing.imageUrl %>" id="preview-<%= i %>" class="absolute w-full h-full object-cover" />
+                      <span class="absolute bottom-1 left-1 text-xs bg-white rounded px-1 z-20"><%= existing.isPrimary ? 'Utama' : 'Tambahan' %></span>
+                      <button type="button" onclick="removeOldImage('<%= i %>', '<%= existing.id %>')" class="absolute top-1 right-1 bg-white text-red-600 rounded-full text-xs px-2 py-0.5 z-20">x</button>
+                    <% } else { %>
+                      <input type="file" name="<%= nameAttr %>" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="handleImageChange(event, '<%= i %>')" />
+                      <img id="preview-<%= i %>" class="absolute w-full h-full object-cover hidden" />
+                      <span id="placeholder-<%= i %>" class="text-gray-400">+</span>
+                      <button type="button" onclick="removeImage('<%= i %>')" class="absolute top-1 right-1 bg-white text-red-600 rounded-full text-xs px-2 py-0.5 hidden z-20" id="remove-<%= i %>">x</button>
+                    <% } %>
+                  </div>
+                <% } %>
+
             </div>
           </div>
 

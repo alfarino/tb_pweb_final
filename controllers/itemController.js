@@ -249,21 +249,21 @@ exports.updateItem = async (req, res) => {
     removedImageIds = [],
   } = req.body;
 
+  // 🗑️ Hapus gambar yang ditandai untuk dihapus (baik di DB maupun Cloudinary)
   const imageIdsToRemove = (Array.isArray(removedImageIds) ? removedImageIds : [removedImageIds])
     .map(id => parseInt(id))
     .filter(id => !isNaN(id));
 
-  // 🗑️ Hapus gambar yang ditandai untuk dihapus
   for (let id of imageIdsToRemove) {
     const img = await prisma.itemImage.findUnique({ where: { id } });
     if (img && img.itemId === itemId) {
       const publicId = getCloudinaryPublicId(img.imageUrl);
       if (publicId) await cloudinary.uploader.destroy(publicId);
-      await prisma.itemImage.delete({ where: { id: img.id } });
+      await prisma.itemImage.delete({ where: { id } });
     }
   }
 
-  // 📝 Update data item utama
+  // 📝 Update data utama produk
   await prisma.item.update({
     where: { id: itemId },
     data: {
@@ -277,13 +277,28 @@ exports.updateItem = async (req, res) => {
     }
   });
 
-  // 📷 Update gambar utama jika ada upload baru
   const files = req.files || {};
+
+  // 📷 Jika ada gambar utama baru, hapus yang lama dan simpan yang baru
   if (files.primaryImage?.[0]) {
+    // Hapus semua gambar isPrimary: true
     await prisma.itemImage.deleteMany({
       where: { itemId, isPrimary: true }
     });
 
+    // 🚫 Pastikan tidak ada tambahan lain yang pakai sortOrder 0 (untuk hindari bentrok unique)
+    await prisma.itemImage.updateMany({
+      where: {
+        itemId,
+        isPrimary: false,
+        sortOrder: 0,
+      },
+      data: {
+        sortOrder: 1000, // sementara, nanti dirapikan di bawah
+      }
+    });
+
+    // Simpan gambar utama baru
     await prisma.itemImage.create({
       data: {
         itemId,
@@ -294,7 +309,7 @@ exports.updateItem = async (req, res) => {
     });
   }
 
-  // 🔄 Tambah gambar tambahan
+  // ➕ Tambah gambar tambahan (jika ada)
   let currentCount = await prisma.itemImage.count({ where: { itemId } });
   let nextSort = currentCount;
 
@@ -311,10 +326,13 @@ exports.updateItem = async (req, res) => {
     }
   }
 
-  // 📊 (Opsional) Rapikan ulang sortOrder agar rapi (0,1,2,...)
+  // 🔢 Rapikan ulang sortOrder agar rapi 0,1,2,... (utama tetap di urutan pertama)
   const allImages = await prisma.itemImage.findMany({
     where: { itemId },
-    orderBy: { sortOrder: 'asc' }
+    orderBy: [
+      { isPrimary: 'desc' }, // primary di atas
+      { sortOrder: 'asc' },
+    ],
   });
 
   for (let i = 0; i < allImages.length; i++) {
