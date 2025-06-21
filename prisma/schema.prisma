@@ -25,25 +25,27 @@ model Cart {
 
 // ============= MASTER TABLES (MAX 3) =============
 model User {
-  id                    Int                    @id @default(autoincrement())
-  email                 String                 @unique
-  username              String                 @unique
+  id                    Int     @id @default(autoincrement())
+  email                 String  @unique
+  username              String  @unique
   password              String
   fullName              String
-  studentId             String?                @unique
+  studentId             String? @unique
   university            String?
   faculty               String?
   major                 String?
   phoneNumber           String?
   profileImage          String?
-  isVerified            Boolean                @default(false)
+  isVerified            Boolean @default(false)
+  isAdmin               Boolean @default(false) // ✅ Tambahan ini
+  isActive              Boolean @default(true)
   verificationToken     String?
   resetPasswordToken    String?
-  reputation            Int                    @default(0)
-  isActive              Boolean                @default(true)
+  reputation            Int     @default(0)
   lastLoginAt           DateTime?
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
   // Relations
   items                 Item[]
   barterRequests        BarterRequest[]
@@ -51,8 +53,8 @@ model User {
   wishlists             Wishlist[]
   wtbRequests           WtbRequest[]
   wtbResponses          WtbResponse[]
-  TransaksiPembeli      Transaksi[]            @relation("TransaksiPembeli")
-  TransaksiPenjual      Transaksi[]            @relation("TransaksiPenjual")
+  TransaksiPembeli      Transaksi[] @relation("TransaksiPembeli")
+  TransaksiPenjual      Transaksi[] @relation("TransaksiPenjual")
   discussions           Discussion[]
   comments              Comment[]
   notifications         Notification[]

@@ -317,7 +317,7 @@ exports.updateItem = async (req, res) => {
     ]
   });
 
-  for (let i = 0; i < allImages.length; i++) {
+  for  (let i = 0; i < allImages.length; i++) {
     await prisma.itemImage.update({
       where: { id: allImages[i].id },
       data: { sortOrder: i }
