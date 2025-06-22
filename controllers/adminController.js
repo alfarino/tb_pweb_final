@@ -261,6 +261,41 @@
   }
 };
 
+exports.deleteItem = async (req, res) => {
+  const itemId = parseInt(req.params.id);
+
+  try {
+    await prisma.item.delete({
+      where: { id: itemId }
+    });
+
+    req.session.success = 'Item berhasil dihapus.';
+    res.redirect('/admin/database-items');
+  } catch (err) {
+    console.error('Gagal menghapus item:', err);
+    res.status(500).send('Terjadi kesalahan saat menghapus item.');
+  }
+};
+
+exports.getApprovedItems = async (req, res) => {
+  try {
+    const items = await prisma.item.findMany({
+      where: {
+        approvalStatus: 'approved',
+        isActive: true
+      },
+      include: {
+        user: true,
+        itemImages: true
+      }
+    });
+
+    res.render('admin/database-items', { items, user: req.session.user });
+  } catch (err) {
+    console.error("Gagal memuat daftar item:", err);
+    res.status(500).send("Terjadi kesalahan saat memuat item.");
+  }
+};
   exports.updateAdminProfile = async (req, res) => {
     try {
       const { fullName, username } = req.body;
