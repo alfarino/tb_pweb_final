@@ -25,4 +25,8 @@ router.post('/users/deactivate/:id', adminController.deactivateUser);
 router.get('/database-items', adminController.getApprovedItems);
 router.post('/items/delete/:id', adminController.deleteItem);
 
+router.get('/database-transactions', adminController.getApprovedTransactions);
+router.post('/transactions/complete/:id', adminController.completeTransaction);
+router.post('/transactions/cancel/:id', adminController.cancelTransaction);
+
 module.exports = router;

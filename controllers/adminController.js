@@ -100,39 +100,36 @@
     }
   };
 
-exports.approveUser = async (req, res) => {
-  const userId = parseInt(req.params.id);
-  try {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user || user.isApproved) return res.redirect('/admin/userapproval');
+  exports.approveUser = async (req, res) => {
+    const userId = parseInt(req.params.id);
+    try {
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user || user.isApproved) return res.redirect('/admin/userapproval');
 
     const username = generateUsername(user.fullName);
-    const plainPassword = generatePassword(); // ✅ ini yang akan dikirim ke email
-    const hashedPassword = await bcrypt.hash(plainPassword, 10); // ✅ ini disimpan di DB
+    const plainPassword = generatePassword();
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        username,
-        password: hashedPassword,
-        isApproved: true,
-        approvedById: req.session.user.id,
-        approvedAt: new Date()
-      }
-    });
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          username,
+          password: hashedPassword,
+          isApproved: true,
+          approvedById: req.session.user.id,
+          approvedAt: new Date()
+        }
+      });
 
-    // ✅ Kirim yang plainPassword, bukan password
-    await sendAccountEmailToUser(user.email, user.fullName, username, plainPassword);
-
-    req.session.success = 'Pengguna berhasil disetujui!';
-  } catch (err) {
-    console.error('Approval Error:', err.message);
-    res.status(500).send('Gagal menyetujui pengguna.');
-  }
+      await sendAccountEmailToUser(user.email, user.fullName, username, password);
+      req.session.success = 'Pengguna berhasil disetujui!';
+    } catch (err) {
+      console.error('Approval Error:', err);
+      req.session.success = 'Gagal menyetujui pengguna.';
+    }
 
   res.redirect('/admin/userapproval');
-};
-
+  };
 
   exports.rejectUser = async (req, res) => {
     const userId = parseInt(req.params.id);
@@ -299,6 +296,67 @@ exports.getApprovedItems = async (req, res) => {
     res.status(500).send("Terjadi kesalahan saat memuat item.");
   }
 };
+
+exports.getApprovedTransactions = async (req, res) => {
+  try {
+    const transactions = await prisma.transaksi.findMany({
+      include: {
+        item: true,
+        pembeli: true,
+        penjual: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.render('admin/database-transactions', {
+      transactions,
+      user: req.session.user,
+      success: req.session.success || null
+    });
+    delete req.session.success;
+  } catch (err) {
+    console.error('Gagal memuat daftar transaksi:', err);
+    res.status(500).send('Terjadi kesalahan saat memuat transaksi.');
+  }
+};
+
+exports.completeTransaction = async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    await prisma.transaksi.update({
+      where: { id },
+      data: {
+        status: 'COMPLETED',
+        completedAt: new Date()
+      }
+    });
+    req.session.success = 'Transaksi ditandai selesai.';
+  } catch (err) {
+    console.error('Gagal menyelesaikan transaksi:', err);
+    req.session.success = 'Gagal menyelesaikan transaksi.';
+  }
+  res.redirect('/admin/database-transactions');
+};
+
+exports.cancelTransaction = async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    await prisma.transaksi.update({
+      where: { id },
+      data: {
+        status: 'CANCELLED'
+      }
+    });
+    req.session.success = 'Transaksi berhasil dibatalkan.';
+  } catch (err) {
+    console.error('Gagal membatalkan transaksi:', err);
+    req.session.success = 'Gagal membatalkan transaksi.';
+  }
+  res.redirect('/admin/database-transactions');
+};
+
   exports.updateAdminProfile = async (req, res) => {
     try {
       const { fullName, username } = req.body;

@@ -34,16 +34,16 @@
         <span>Approval Item</span>
       </a>
 
-        <a href="/admin/userapproval"
-           class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
-                  <%= currentUrl === '/admin/userapproval' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
+      <a href="/admin/userapproval"
+         class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
+                <%= currentUrl === '/admin/userapproval' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
         <span>👤</span>
         <span>Approval Pengguna</span>
       </a>
 
       <a href="/admin/database-items"
          class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
-                <%= currentUrl === '/admin/database-item' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
+                <%= currentUrl === '/admin/database-items' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
         <span>📦</span>
         <span>Kelola Item</span>
       </a>
@@ -53,6 +53,14 @@
                 <%= currentUrl === '/admin/database-users' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
         <span>🧑‍💼</span>
         <span>Kelola Pengguna</span>
+      </a>
+
+      <!-- Kelola Transaksi -->
+      <a href="/admin/database-transactions"
+         class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
+                <%= currentUrl === '/admin/database-transactions' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
+        <span>💳</span>
+        <span>Kelola Transaksi</span>
       </a>
 
     <% } %>
