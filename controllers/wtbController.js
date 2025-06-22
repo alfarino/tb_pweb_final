@@ -1,41 +1,97 @@
-// wtbController.js
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// Fungsi untuk menangani WTB request
 const createWtbRequest = async (req, res) => {
+  const userId = req.session.user?.id;
   const { title, description, maxPrice, category, preferredCondition, location, urgency } = req.body;
 
+  if (!userId) return res.redirect('/login');
+
   try {
-    const newWtbRequest = await prisma.wtbRequest.create({
+    await prisma.wtbRequest.create({
       data: {
+        userId,
         title,
         description,
-        maxPrice,
+        maxPrice: maxPrice ? parseFloat(maxPrice) : null,
         category,
         preferredCondition,
         location,
-        urgency,
-      },
+        urgency
+      }
     });
 
-    // Redirect ke halaman WTB setelah berhasil
-    res.redirect("/wtb");
-  } catch (error) {
-    console.error("Error creating WTB request:", error);
-    res.status(500).send("An error occurred while creating WTB request.");
+    res.redirect('/wtb');
+  } catch (err) {
+    console.error('Gagal membuat WTB:', err);
+    res.status(500).send('Gagal menyimpan permintaan.');
   }
 };
 
-// Fungsi untuk mengambil WTB request
-const getWantToBuyPage = async (req, res) => {
+const renderBerandaPage = async (req, res) => {
+  const user = req.session.user;
+
   try {
-    const wtbRequests = await prisma.wtbRequest.findMany();
-    res.render("wtb/wtb", { wtbRequests });
+    const wtbRequests = await prisma.wtbRequest.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.render('wtb/wtb', {
+      user,
+      wtbRequests
+    });
   } catch (error) {
-    console.error("Error fetching WTB requests:", error);
-    res.render("wtb/wtb", { wtbRequests: [] });
+    console.error('Error loading beranda:', error);
+    res.status(500).send('Terjadi kesalahan saat memuat halaman.');
   }
 };
 
-module.exports = { createWtbRequest, getWantToBuyPage };
+const getBerandaPartial = async (req, res) => {
+  try {
+    const wtbRequests = await prisma.wtbRequest.findMany({
+      orderBy: { createdAt: "desc" }
+    });
+    res.render("wtb/partials/beranda-wtb", { wtbRequests });
+  } catch (error) {
+    console.error("Error loading beranda partial:", error);
+    res.status(500).send("Gagal memuat data.");
+  }
+};
+
+const getPostSayaPartial = async (req, res) => {
+  try {
+    const userId = req.session.user?.id;
+    if (!userId) return res.status(401).send("Unauthorized");
+
+    const posts = await prisma.wtbRequest.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.render("wtb/partials/postSaya", { posts });
+  } catch (error) {
+    console.error("Gagal memuat post saya:", error);
+    res.status(500).send("Gagal memuat post saya.");
+  }
+};
+
+const getKomentarSayaPartial = async (req, res) => {
+  try {
+    res.render("wtb/partials/komentarSaya", {
+      comments: []
+    });
+  } catch (error) {
+    console.error("Gagal memuat komentar saya:", error);
+    res.status(500).send("Gagal memuat komentar.");
+  }
+};
+
+// ✅ Export semua fungsi secara eksplisit
+module.exports = {
+  createWtbRequest,
+  renderBerandaPage,
+  getBerandaPartial,
+  getPostSayaPartial,
+  getKomentarSayaPartial
+};

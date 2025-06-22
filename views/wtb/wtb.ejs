@@ -6,25 +6,21 @@
   <title>Want to Buy</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script>
-    // Fungsi untuk menampilkan konten sesuai dengan menu yang dipilih
     function showContent(contentId, menuId) {
       const contentSections = document.querySelectorAll('.content-section');
       contentSections.forEach(section => {
-        section.style.display = 'none'; // Sembunyikan semua konten
+        section.style.display = 'none';
       });
-      document.getElementById(contentId).style.display = 'block'; // Tampilkan konten yang dipilih
+      document.getElementById(contentId).style.display = 'block';
 
-      // Hapus kelas 'active' dari semua menu
       const menuItems = document.querySelectorAll('.menu-item');
       menuItems.forEach(item => {
         item.classList.remove('text-blue-500', 'underline');
       });
 
-      // Tambahkan kelas 'active' pada menu yang dipilih
       document.getElementById(menuId).classList.add('text-blue-500', 'underline');
     }
 
-    // Menampilkan konten Beranda secara default
     window.onload = function() {
       showContent('beranda', 'berandaMenu');
     }
@@ -35,23 +31,94 @@
   <!-- Navbar -->
   <%- include('../layout/navbar') %>
 
-  <!-- Wrapper untuk padding besar -->
+  <!-- Wrapper -->
   <div class="flex flex-1 px-64">
 
     <!-- Sidebar -->
-    <%- include('partials/sidebar-wtb') %>
+    <aside class="fixed top-0 left-0 h-screen w-64 bg-white shadow-lg border-r border-gray-200 z-50 flex flex-col">
+        <!-- Header Sidebar -->
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+              <%= user?.fullName ? user.fullName[0].toUpperCase() : '?' %>
+            </div>
+            <span class="text-gray-700 font-semibold truncate">
+              <%= user?.fullName || '(Nama Akun)' %>
+            </span>
+          </div>
+        </div>
 
-    <!-- Konten Utama -->
+        <!-- Navigasi -->
+        <nav class="mt-4 flex-1 space-y-1">
+          <a href="/wtb/beranda" class="flex items-center space-x-3 px-6 py-3 hover:bg-gray-100 font-medium text-gray-700">
+            <span>🏠</span>
+            <span>Beranda</span>
+          </a>
+
+          <a href="/wtb/post-saya" class="flex items-center space-x-3 px-6 py-3 hover:bg-gray-100 font-medium text-gray-700">
+            <span>📝</span>
+            <span>Post Saya</span>
+          </a>
+
+          <a href="/wtb" class="flex items-center space-x-3 px-6 py-3 hover:bg-gray-100 font-medium text-gray-700">
+            <span>🛒</span>
+            <span>Request</span>
+          </a>
+
+          <a href="/wtb/komentar-saya" class="flex items-center space-x-3 px-6 py-3 hover:bg-gray-100 font-medium text-gray-700">
+            <span>💬</span>
+            <span>Komentar Saya</span>
+          </a>
+        </nav>
+      </aside>
+
+
+    <!-- Main Content -->
     <div class="flex-1 bg-gray-100 p-6">
-      <!-- Meng-include Partial Views -->
-      <%- include('partials/beranda-wtb') %>
-      <%- include('partials/postSaya') %>
-      <%- include('partials/komentarSaya') %>
+
+      <!-- Form Input WTB Request -->
+      <div class="mb-8 bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-bold mb-4">Buat WTB Request</h2>
+        <form action="/wtb/create" method="POST" class="space-y-4">
+          <input type="text" name="title" placeholder="Judul" required class="w-full p-2 border rounded" />
+          <textarea name="description" placeholder="Deskripsi" required class="w-full p-2 border rounded"></textarea>
+          <input type="number" name="maxPrice" step="0.01" placeholder="Harga Maksimal" required class="w-full p-2 border rounded" />
+          <input type="text" name="category" placeholder="Kategori" required class="w-full p-2 border rounded" />
+          <input type="text" name="preferredCondition" placeholder="Kondisi yang Diinginkan" required class="w-full p-2 border rounded" />
+          <input type="text" name="location" placeholder="Lokasi" required class="w-full p-2 border rounded" />
+          <select name="urgency" required class="w-full p-2 border rounded">
+            <option value="" disabled selected>Kebutuhan</option>
+            <option value="URGENT">URGENT</option>
+            <option value="NO">NORMAL</option>
+          </select>
+          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Submit</button>
+        </form>
+      </div>
+
+      <!-- List WTB Requests -->
+      <div class="bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-bold mb-4">Daftar Permintaan (WTB)</h2>
+        <% if (wtbRequests && wtbRequests.length === 0) { %>
+          <p class="text-gray-500">Belum ada permintaan.</p>
+        <% } else { %>
+          <ul class="space-y-4">
+            <% wtbRequests.forEach(request => { %>
+              <li class="border-b pb-4">
+                <h3 class="font-semibold text-lg"><%= request.title %></h3>
+                <p class="text-gray-700"><%= request.description %></p>
+                <p class="text-sm text-gray-500">Harga Maks: Rp<%= request.maxPrice %> | Kategori: <%= request.category %> | Lokasi: <%= request.location %></p>
+                <span class="text-xs text-blue-500">Urgensi: <%= request.urgency %></span>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+
     </div>
 
   </div>
 
-  <!-- Footer yang selalu di bawah -->
+  <!-- Footer -->
   <%- include('../layout/footer') %>
 
 </body>
