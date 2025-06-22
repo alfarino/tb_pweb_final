@@ -32,7 +32,7 @@ exports.getItemDetail = async (req, res) => {
     };
 
     const produkLainnya = await prisma.item.findMany({
-      where: { id: { not: itemId }, isActive: true, isAvailable: true },
+      where: { id: { not: itemId }, isActive: true, isAvailable: true, approvalStatus: 'approved' },
       include: {
         itemImages: {
           where: { isPrimary: true },
@@ -53,7 +53,7 @@ exports.getItemDetail = async (req, res) => {
 exports.getItemList = async (req, res) => {
   try {
     const items = await prisma.item.findMany({
-      where: { isActive: true, isAvailable: true },
+      where: { isActive: true, isAvailable: true, approvalStatus: 'approved' },
       include: { itemImages: true }
     });
 
@@ -225,7 +225,8 @@ exports.addItem = async (req, res) => {
         conditionDetail,
         location,
         isActive: true,
-        isAvailable: true
+        isAvailable: true,
+        approvalStatus: 'pending', // Set to true for simplicity
       }
     });
 

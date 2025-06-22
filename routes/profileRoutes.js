@@ -3,10 +3,8 @@ const router = express.Router();
 const itemController = require('../controllers/itemController');
 const checkoutController = require('../controllers/checkoutController');
 const { requireLogin } = require('../middleware/auth'); 
-
-router.get('/edit-profile', (req, res) => {
-  res.render('profile/edit-profile');
-});
+const uploadProfileImage = require('../middleware/uploadProfileImage');
+const profileController = require('../controllers/profileController');
 
 router.get('/profile/product', requireLogin, async (req, res) => {
   const produk = await prisma.item.findMany({
@@ -44,5 +42,9 @@ router.get('/history-buy', itemController.getRiwayatPembelian);
 router.get('/history-sell', itemController.getHistorySellPage);
 
 router.post('/complete/:id', checkoutController.completeTransaksi);
+
+router.get('/edit-profile', requireLogin, profileController.showEditProfilePage);
+
+router.post('/edit-profile', requireLogin, uploadProfileImage.single('profileImage'), profileController.updateProfile);
 
 module.exports = router;

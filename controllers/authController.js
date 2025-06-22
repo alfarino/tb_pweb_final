@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt');
 
 exports.showRegisterPage = (req, res) => {
   res.render('auth/register', { error: null, success: null });
@@ -91,7 +92,13 @@ exports.login = async (req, res) => {
       where: { email },
     });
 
-    if (!user || user.password !== password) {
+    if (!user) {
+      return res.render('auth/login', { error: 'Email atau password salah!' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
       return res.render('auth/login', { error: 'Email atau password salah!' });
     }
 
@@ -100,7 +107,7 @@ exports.login = async (req, res) => {
       email: user.email,
       fullName: user.fullName,
       isAdmin: user.isAdmin,
-      faculty: user.faculty
+      faculty: user.faculty,
     };
 
     if (user.isAdmin) {
