@@ -34,7 +34,11 @@
 </head>
 <body class="flex flex-col min-h-screen bg-white">
 
-  <%- include('../layout/navbar') %>
+<% if (user?.isAdmin) { %>
+  <%- include('../admin/adminnavbar') %>
+<% } else { %>
+  <%- include('layout/navbar') %>
+<% } %>
 
   <% if (errorMessage && errorMessage.length > 0) { %>
     <script>

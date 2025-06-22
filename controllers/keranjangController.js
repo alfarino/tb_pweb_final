@@ -79,44 +79,42 @@ exports.deleteCartItem = async (req, res) => {
 exports.addToCart = async (req, res) => {
   try {
     const { itemId, quantity, redirect } = req.body;
-    const userId = req.session.user.id;
+    const user = req.session.user;
+    const userId = user.id;
     
-    // Convert ke integer
     const itemIdInt = parseInt(itemId);
     const quantityInt = parseInt(quantity) || 1;
-    
-     // ✅ Ambil data item dulu, termasuk userId pemiliknya
+
+    // Ambil data item (untuk cek pemilik)
     const item = await prisma.item.findUnique({
       where: { id: itemIdInt },
-      select: { userId: true } // hanya ambil userId pemilik
+      select: { userId: true }
     });
 
     if (!item) {
       return res.status(404).send('Barang tidak ditemukan');
     }
 
-    // ❌ Cek apakah user mencoba membeli barang milik sendiri
-    if (item.userId === userId) {
+    // ❌ Admin dan pemilik barang tidak boleh beli
+    if (item.userId === userId || user.isAdmin === true) {
       req.flash('error', 'Tidak dapat membeli atau memasukkan barang milik sendiri ke keranjang');
-      return res.redirect('/items/' + itemIdInt); // redirect kembali ke halaman produk
+      return res.redirect('/items/' + itemIdInt);
     }
 
-    // ✅ Lanjut jika bukan milik sendiri
+    // ✅ Lanjut proses keranjang
     const existingCart = await prisma.cart.findFirst({
       where: {
         userId: userId,
         itemId: itemIdInt
       }
     });
-    
+
     if (existingCart) {
-      // Jika sudah ada, tambah quantity
       await prisma.cart.update({
         where: { id: existingCart.id },
         data: { quantity: existingCart.quantity + quantityInt }
       });
     } else {
-      // Jika belum ada, buat record baru
       await prisma.cart.create({
         data: {
           userId: userId,
@@ -125,16 +123,14 @@ exports.addToCart = async (req, res) => {
         }
       });
     }
-    
-    // Tentukan redirect berdasarkan parameter
+
+    // Redirect
     if (redirect === 'checkout') {
-      // Untuk "Beli Sekarang" - langsung ke checkout
       res.redirect('/keranjang');
     } else {
-      // Untuk "Masukkan Keranjang" - ke halaman keranjang
       res.redirect('/keranjang');
     }
-    
+
   } catch (error) {
     console.error('Error addToCart:', error);
     res.status(500).send('Gagal menambahkan item ke keranjang');
