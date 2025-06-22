@@ -15,5 +15,7 @@ router.get('/adminprofile', adminController.getAdminProfile);
 router.get('/users/approval', adminController.getUserApprovalList);
 router.post('/users/approve/:id', adminController.approveUser);
 router.post('/users/reject/:id', adminController.rejectUser); // ⬅️ Tambahan
+router.get('/adminedit-profile', adminController.getAdminEditProfile);
+router.post('/adminedit-profile', adminController.updateAdminProfile);
 
 module.exports = router;
