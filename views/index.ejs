@@ -6,7 +6,11 @@
 </head>
 <body class="bg-white text-gray-800 min-h-screen flex flex-col"> <!-- bg-black-500 diubah ke white agar valid -->
 
-<%- include('layout/navbar') %>
+<% if (user?.isAdmin) { %>
+  <%- include('admin/adminnavbar') %>
+<% } else { %>
+  <%- include('layout/navbar') %>
+<% } %>
 
 <main class="flex-grow">
       <!-- Banner -->

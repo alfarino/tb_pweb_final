@@ -107,6 +107,7 @@ exports.login = async (req, res) => {
       email: user.email,
       fullName: user.fullName,
       isAdmin: user.isAdmin,
+      profileImage: user.profileImage,
       faculty: user.faculty,
     };
 
