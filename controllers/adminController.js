@@ -1,128 +1,109 @@
-// controllers/adminController.js
 const prisma = require('../prisma/client');
 const { generateUsername, generatePassword } = require('../utils/generateCred');
 const { sendAccountEmailToUser, sendRejectionEmail } = require('../utils/mailer');
 
+// ==============================
+// DASHBOARD
+// ==============================
 exports.getAdminDashboard = async (req, res) => {
-  const pendingItems = await prisma.item.count({ where: { approvalStatus: 'pending' } });
-  const pendingUsers = await prisma.user.count({ where: { isApproved: false, isAdmin: false } });
-
-  res.render('admin/admin-dashboard', { pendingItems, pendingUsers, user: req.session.user });
-};
-
-exports.getItemApproval = async (req, res) => {
-  const items = await prisma.item.findMany({
-    where: { approvalStatus: 'pending' },
-    include: { user: true, itemImages: true }
-  });
-  res.render('admin/itemapproval', { items, user: req.session.user });
-};
-
-exports.approveItem = async (req, res) => {
-  const { id } = req.params;
-  await prisma.item.update({
-    where: { id: parseInt(id) },
-    data: {
-      approvalStatus: 'approved',
-      approvedAt: new Date(),
-      approvedById: req.session.user.id
-    }
-  });
-
-  req.session.success = 'Produk berhasil disetujui.';
-  res.redirect('/admin/item-approval');
-};
-
-exports.rejectItem = async (req, res) => {
-  const { id } = req.params;
-  await prisma.item.update({
-    where: { id: parseInt(id) },
-    data: {
-      approvalStatus: 'rejected',
-      approvedAt: new Date(),
-      approvedById: req.session.user.id
-    }
-  });
-
-  req.session.success = 'Produk telah ditolak.';
-  res.redirect('/admin/item-approval');
-};
-
-
-exports.getUserApproval = async (req, res) => {
-  const users = await prisma.user.findMany({ where: { isApproved: false, isAdmin: false } });
-  res.render('admin/userapproval', { users, user: req.session.user });
-};
-
-exports.approveUser = async (req, res) => {
-  const { id } = req.params;
-  await prisma.user.update({
-    where: { id: parseInt(id) },
-    data: {
-      isApproved: true,
-      approvedAt: new Date(),
-      approvedById: req.session.user.id
-    }
-  });
-  res.redirect('/admin/user-approval');
-};
-
-exports.getAdminProfile = async (req, res) => {
   try {
-    const adminId = req.session.user.id;
+    const pendingItems = await prisma.item.count({ where: { approvalStatus: 'pending' } });
+    const pendingUsers = await prisma.user.count({ where: { isApproved: false, isAdmin: false } });
 
-    // Ambil data lengkap admin dari database
-    const admin = await prisma.user.findUnique({
-      where: { id: adminId },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        fullName: true,
-        phoneNumber: true,
-        major: true,
-        isAdmin: true
-      }
+    res.render('admin/admin-dashboard', {
+      pendingItems,
+      pendingUsers,
+      user: req.session.user,
     });
-
-    // Render halaman dengan data admin lengkap
-    res.render('admin/admin-profile', { user: admin });
   } catch (err) {
-    console.error('Gagal load admin profile:', err);
+    console.error('Gagal memuat dashboard:', err);
     res.status(500).send('Internal Server Error');
   }
 };
 
-exports.updateAdminProfile = async (req, res) => {
-  const { fullName, username } = req.body;
-  const userId = req.session.user.id;
+// ==============================
+// APPROVAL PRODUK
+// ==============================
+exports.getItemApproval = async (req, res) => {
+  try {
+    const items = await prisma.item.findMany({
+      where: { approvalStatus: 'pending' },
+      include: { user: true, itemImages: true }
+    });
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { fullName, username }
-  });
-
-  req.session.user.fullName = fullName;
-  req.session.user.username = username;
-
-  req.session.success = "Profil admin berhasil diperbarui!";
-  res.redirect('/admin/profile');
+    res.render('admin/itemapproval', {
+      items,
+      user: req.session.user,
+      success: res.locals.success
+    });
+  } catch (err) {
+    console.error('Gagal load item approval:', err);
+    res.status(500).send('Internal Server Error');
+  }
 };
 
-exports.getUserApprovalList = async (req, res) => {
-  const users = await prisma.user.findMany({
-    where: { isApproved: false },
-    orderBy: { createdAt: 'desc' }
-  });
+exports.approveItem = async (req, res) => {
+  try {
+    await prisma.item.update({
+      where: { id: parseInt(req.params.id) },
+      data: {
+        approvalStatus: 'approved',
+        approvedAt: new Date(),
+        approvedById: req.session.user.id
+      }
+    });
+    req.session.success = 'Produk berhasil disetujui.';
+  } catch (err) {
+    console.error('Approve item error:', err);
+    req.session.success = 'Gagal menyetujui produk.';
+  }
+  res.redirect('/admin/item-approval');
+};
 
-  res.render('admin/userapproval', { users });
+exports.rejectItem = async (req, res) => {
+  try {
+    await prisma.item.update({
+      where: { id: parseInt(req.params.id) },
+      data: {
+        approvalStatus: 'rejected',
+        approvedAt: new Date(),
+        approvedById: req.session.user.id
+      }
+    });
+    req.session.success = 'Produk telah ditolak.';
+  } catch (err) {
+    console.error('Reject item error:', err);
+    req.session.success = 'Gagal menolak produk.';
+  }
+  res.redirect('/admin/item-approval');
+};
+
+// ==============================
+// APPROVAL USER
+// ==============================
+exports.getUserApprovalList = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: { isApproved: false, isAdmin: false },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.render('admin/userapproval', { // ✅ ini sudah sinkron
+      users,
+      user: req.session.user,
+      success: res.locals.success
+    });
+  } catch (err) {
+    console.error('Gagal load user approval:', err);
+    res.status(500).send('Internal Server Error');
+  }
 };
 
 exports.approveUser = async (req, res) => {
   const userId = parseInt(req.params.id);
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user || user.isApproved) return res.redirect('/admin/users/approval');
+    if (!user || user.isApproved) return res.redirect('/admin/userapproval');
 
     const username = generateUsername(user.fullName);
     const password = generatePassword();
@@ -139,27 +120,56 @@ exports.approveUser = async (req, res) => {
     });
 
     await sendAccountEmailToUser(user.email, user.fullName, username, password);
-    res.redirect('/admin/users/approval');
+    req.session.success = 'Pengguna berhasil disetujui!';
   } catch (err) {
     console.error('Approval Error:', err);
-    res.redirect('/admin/users/approval');
+    req.session.success = 'Gagal menyetujui pengguna.';
   }
+
+ res.redirect('/admin/userapproval');
 };
 
 exports.rejectUser = async (req, res) => {
   const userId = parseInt(req.params.id);
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user || user.isApproved) return res.redirect('/admin/users/approval');
+    if (!user || user.isApproved) return res.redirect('/admin/userapproval'); // ✅ sinkron
 
     await sendRejectionEmail(user.email, user.fullName);
-
     await prisma.user.delete({ where: { id: userId } });
 
-    res.redirect('/admin/users/approval');
+    req.session.success = 'Pengguna telah ditolak dan dihapus.';
   } catch (err) {
     console.error('Reject Error:', err);
-    res.redirect('/admin/users/approval');
+    req.session.success = 'Gagal menolak pengguna.';
+  }
+
+  res.redirect('/admin/userapproval'); // ✅ betulkan
+};
+
+
+// ==============================
+// PROFIL ADMIN
+// ==============================
+exports.getAdminProfile = async (req, res) => {
+  try {
+    const admin = await prisma.user.findUnique({
+      where: { id: req.session.user.id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        fullName: true,
+        phoneNumber: true,
+        major: true,
+        isAdmin: true
+      }
+    });
+
+    res.render('admin/admin-profile', { user: admin });
+  } catch (err) {
+    console.error('Gagal load admin profile:', err);
+    res.status(500).send('Internal Server Error');
   }
 };
 
@@ -229,10 +239,8 @@ exports.deactivateUser = async (req, res) => {
 
 exports.getAdminEditProfile = async (req, res) => {
   try {
-    const adminId = req.session.user.id;
-
     const admin = await prisma.user.findUnique({
-      where: { id: adminId },
+      where: { id: req.session.user.id },
       select: {
         id: true,
         username: true,
@@ -247,6 +255,25 @@ exports.getAdminEditProfile = async (req, res) => {
     res.render('admin/adminedit-profile', { user: admin });
   } catch (err) {
     console.error('Gagal load form edit admin profile:', err);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+exports.updateAdminProfile = async (req, res) => {
+  try {
+    const { fullName, username } = req.body;
+
+    await prisma.user.update({
+      where: { id: req.session.user.id },
+      data: { fullName, username }
+    });
+
+    req.session.user.fullName = fullName;
+    req.session.user.username = username;
+    req.session.success = "Profil admin berhasil diperbarui!";
+    res.redirect('/admin/profile');
+  } catch (err) {
+    console.error('Gagal update profil admin:', err);
     res.status(500).send('Internal Server Error');
   }
 };

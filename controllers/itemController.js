@@ -57,7 +57,14 @@ exports.getItemList = async (req, res) => {
       include: { itemImages: true }
     });
 
-    res.render('index', { items });
+     // Tambahkan array tombol di sini
+    const tombol = [
+      { label: 'WTB', link: '/wtb' },
+      { label: 'Rekomendasi', link: '/recommendations' },
+      {}, {}, {}, {}, {} // 5 slot kosong
+    ];
+
+    res.render('index', { items, tombol });
   } catch (error) {
     console.error(error);
     res.status(500).render('errors/500', { message: 'Server error' });

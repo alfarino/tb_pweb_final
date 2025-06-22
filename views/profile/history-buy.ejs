@@ -78,7 +78,7 @@
                   </p>
 
                   <!-- Button Cetak Resi (kalau selesai) -->
-                  <% if (item.status === 'COMPLETED') { %>
+                  <% if (item.status === 'selesai') { %>
                     <form action="/checkout/sukses" method="GET" class="mt-4">
                       <input type="hidden" name="ids" value="<%= item.transaksiId %>">
                       <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">

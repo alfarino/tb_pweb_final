@@ -33,7 +33,14 @@ const getRecommendationsByFaculty = async (req, res) => {
       },
     });
 
-    res.render('recommendations/recommendations', { items });
+    const tombol = [
+      { label: 'WTB', link: '/wtb' },
+      { label: 'Rekomendasi', link: '/recommendations' },
+      {}, {}, {}, {}, {} // 5 slot kosong
+    ];
+
+
+    res.render('recommendations/recommendations', { items, tombol });
   } catch (error) {
     console.error('❌ Gagal mengambil rekomendasi:', error);
     res.status(500).send('Terjadi kesalahan saat mengambil data rekomendasi.');
