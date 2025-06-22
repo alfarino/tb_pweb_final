@@ -36,46 +36,27 @@
             <%= user?.fullName?.charAt(0) || 'A' %>
           </div>
           <div class="text-sm">
-            <p class="font-semibold leading-tight"><%= user?.fullName || 'Pengguna' %></p>
+            <p class="font-semibold leading-tight"><%= user?.fullName || 'Admin' %></p>
             <p class="text-xs text-gray-500">Profil</p>
           </div>
         </div>
 
-        <!-- Menu Items -->
-        <a href="/admin/adminprofile"
-          class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
-            <%= currentUrl === '/admin/adminprofile' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
-          <span>👤</span>
-          <span>Akun Saya</span>
+        <!-- Menu -->
+        <a href="/admin/adminprofile" class="flex items-center gap-2 px-5 py-3 text-sm font-medium hover:bg-gray-100 <%= currentUrl === '/admin/adminprofile' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
+          <span>👤</span><span>Akun Saya</span>
         </a>
-
-        <a href="/admin/dashboard"
-          class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
-            <%= currentUrl === '/admin/dashboard' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
-          <span>📊</span>
-          <span>Dashboard Admin</span>
+        <a href="/admin/dashboard" class="flex items-center gap-2 px-5 py-3 text-sm font-medium hover:bg-gray-100 <%= currentUrl === '/admin/dashboard' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
+          <span>📊</span><span>Dashboard Admin</span>
         </a>
-
-        <a href="/admin/item-approval"
-          class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
-            <%= currentUrl === '/admin/item-approval' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
-          <span>✅</span>
-          <span>Approval Item</span>
+        <a href="/admin/item-approval" class="flex items-center gap-2 px-5 py-3 text-sm font-medium hover:bg-gray-100 <%= currentUrl === '/admin/item-approval' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
+          <span>✅</span><span>Approval Item</span>
         </a>
-
-        <a href="/admin/user-approval"
-          class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100
-            <%= currentUrl === '/admin/user-approval' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
-          <span>🧑‍💼</span>
-          <span>Approval Pengguna</span>
+        <a href="/admin/user-approval" class="flex items-center gap-2 px-5 py-3 text-sm font-medium hover:bg-gray-100 <%= currentUrl === '/admin/user-approval' ? 'bg-gray-100 text-blue-600' : 'text-gray-700' %>">
+          <span>🧑‍💼</span><span>Approval Pengguna</span>
         </a>
-
         <hr class="my-1 border-gray-200">
-
-        <a href="/logout"
-          class="flex items-center space-x-3 px-6 py-3 font-medium hover:bg-gray-100">
-          <span>🚪</span>
-          <span>Keluar</span>
+        <a href="/logout" class="flex items-center gap-2 px-5 py-3 text-sm font-medium text-red-600 hover:bg-red-50">
+          <span>🚪</span><span>Keluar</span>
         </a>
       </div>
     </div>

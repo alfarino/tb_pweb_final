@@ -2,53 +2,77 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Approval Pengguna - Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
   <!-- Navbar -->
   <%- include('adminnavbar') %>
 
-  <!-- Konten Utama -->
-  <main class="max-w-6xl mx-auto py-10 px-4">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">Daftar Pengguna Menunggu Persetujuan</h1>
+  <div class="flex flex-1">
+    <!-- Sidebar -->
+    <%- include('adminsidebar', { currentUrl: '/admin/user-approval' }) %>
 
-    <% if (users.length === 0) { %>
-      <div class="text-center text-gray-500">Tidak ada pendaftar baru saat ini.</div>
-    <% } else { %>
-      <div class="grid gap-6">
-        <% users.forEach(user => { %>
-          <div class="bg-white p-6 rounded-xl shadow flex flex-col md:flex-row justify-between items-start md:items-center">
-            <!-- Informasi Pengguna -->
-            <div>
-              <p class="text-lg font-semibold"><%= user.fullName %></p>
-              <p class="text-gray-600 text-sm">Email: <%= user.email %></p>
-              <p class="text-gray-600 text-sm">NIM: <%= user.studentId || '-' %></p>
-              <p class="text-gray-600 text-sm">Fakultas: <%= user.faculty || '-' %> | Jurusan: <%= user.major || '-' %></p>
-            </div>
+    <!-- Main Content -->
+    <main class="flex-1 p-10 overflow-y-auto">
+      <div class="bg-white rounded-xl shadow-md p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Approval Pengguna</h1>
 
-            <!-- Tombol Aksi -->
-            <div class="flex flex-col md:flex-row gap-2 mt-4 md:mt-0">
-              <form action="/admin/users/approve/<%= user.id %>" method="POST">
-                <button type="submit"
-                  class="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg transition">
-                  Setujui
-                </button>
-              </form>
-              <form action="/admin/users/reject/<%= user.id %>" method="POST">
-                <button type="submit"
-                  class="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2 rounded-lg transition">
-                  Tolak
-                </button>
-              </form>
-            </div>
+        <!-- SweetAlert2 Success Notification -->
+        <% if (typeof success !== 'undefined' && success) { %>
+          <script>
+            document.addEventListener('DOMContentLoaded', function () {
+              Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '<%= success %>',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+              });
+            });
+          </script>
+        <% } %>
+
+        <% if (users.length === 0) { %>
+          <p class="text-gray-500 text-center py-10">Tidak ada pendaftar baru saat ini.</p>
+        <% } else { %>
+          <div class="grid gap-6">
+            <% users.forEach(user => { %>
+              <div class="bg-gray-50 p-5 rounded-lg shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center">
+                <!-- Informasi Pengguna -->
+                <div>
+                  <p class="text-lg font-semibold"><%= user.fullName %></p>
+                  <p class="text-gray-600 text-sm">Email: <%= user.email %></p>
+                  <p class="text-gray-600 text-sm">NIM: <%= user.studentId || '-' %></p>
+                  <p class="text-gray-600 text-sm">Fakultas: <%= user.faculty || '-' %> | Jurusan: <%= user.major || '-' %></p>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="flex flex-col md:flex-row gap-2 mt-4 md:mt-0">
+                  <form action="/admin/users/approve/<%= user.id %>" method="POST">
+                    <button type="submit"
+                      class="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg transition">
+                      Setujui
+                    </button>
+                  </form>
+                  <form action="/admin/users/reject/<%= user.id %>" method="POST">
+                    <button type="submit"
+                      class="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2 rounded-lg transition">
+                      Tolak
+                    </button>
+                  </form>
+                </div>
+              </div>
+            <% }) %>
           </div>
-        <% }) %>
+        <% } %>
       </div>
-    <% } %>
-  </main>
+    </main>
+  </div>
 
   <!-- Footer -->
   <%- include('../layout/footer') %>
