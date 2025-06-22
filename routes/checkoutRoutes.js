@@ -17,4 +17,7 @@
 
     router.post('/konfirmasi/:id', requireLogin, checkoutController.handleKonfirmasi);
 
+    router.get('/pdf', checkoutController.generatePDF);
+    router.get('/pdf-view', checkoutController.generatePDFPublic);
+
     module.exports = router;

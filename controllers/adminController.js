@@ -254,12 +254,12 @@
         }
       });
 
-      res.render('admin/adminedit-profile', { user: admin });
-    } catch (err) {
-      console.error('Gagal load form edit admin profile:', err);
-      res.status(500).send('Internal Server Error');
-    }
-  };
+    res.render('admin/adminedit-profile', { user: admin });
+  } catch (err) {
+    console.error('Gagal load form edit admin profile:', err);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
   exports.updateAdminProfile = async (req, res) => {
     try {

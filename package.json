@@ -24,7 +24,9 @@
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.3",
     "passport": "^0.7.0",
-    "prisma": "^6.9.0"
+    "pdfkit": "^0.17.1",
+    "prisma": "^6.9.0",
+    "puppeteer": "^24.10.2"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
