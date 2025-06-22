@@ -163,6 +163,70 @@ exports.rejectUser = async (req, res) => {
   }
 };
 
+//fungsi menampilkan user di tabel kelola user
+
+exports.getApprovedUsers = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        isApproved: true,
+        isAdmin: false
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.render('admin/database-users', {
+      users,
+      user: req.session.user,
+      success: req.session.success || null
+    });
+    delete req.session.success;
+  } catch (err) {
+    console.error('Gagal memuat daftar user:', err);
+    res.status(500).send('Terjadi kesalahan saat memuat data pengguna.');
+  }
+};
+
+//fungsi mengaktifkan user yang nonaktif di (database user)
+
+exports.activateUser = async (req, res) => {
+  const userId = parseInt(req.params.id);
+
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: true }
+    });
+
+    req.session.success = "Akun berhasil diaktifkan.";
+    res.redirect('/admin/database-users');
+  } catch (err) {
+    console.error('Gagal mengaktifkan user:', err);
+    res.status(500).send('Terjadi kesalahan saat mengaktifkan akun.');
+  }
+};
+
+//fungsi menonaktifkan akun user
+
+exports.deactivateUser = async (req, res) => {
+  const userId = parseInt(req.params.id);
+
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: false }
+    });
+
+    req.session.success = "Akun berhasil dinonaktifkan.";
+    res.redirect('/admin/database-users');
+  } catch (err) {
+    console.error('Gagal menonaktifkan user:', err);
+    res.status(500).send('Terjadi kesalahan saat menonaktifkan akun.');
+  }
+};
+
 exports.getAdminEditProfile = async (req, res) => {
   try {
     const adminId = req.session.user.id;

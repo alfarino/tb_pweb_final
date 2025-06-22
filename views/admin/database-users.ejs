@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kelola Pengguna - Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <%- include('adminnavbar') %>
+
+  <div class="flex flex-1">
+    <!-- Sidebar -->
+    <%- include('adminsidebar', { currentUrl: '/admin/database-users' }) %>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-10 overflow-y-auto">
+      <div class="bg-white rounded-xl shadow-md p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Kelola Akun Pengguna</h1>
+
+        <!-- SweetAlert2 Success Notification -->
+        <% if (typeof success !== 'undefined' && success) { %>
+          <script>
+            document.addEventListener('DOMContentLoaded', function () {
+              Swal.fire({
+                icon: 'success',
+                title: 'Sukses!',
+                text: '<%= success %>',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+              });
+            });
+          </script>
+        <% } %>
+
+        <% if (users.length === 0) { %>
+          <p class="text-gray-500 text-center py-10">Belum ada pengguna yang disetujui.</p>
+        <% } else { %>
+          <div class="grid gap-6">
+            <% users.forEach(user => { %>
+              <div class="bg-gray-50 p-5 rounded-lg shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center">
+                
+                <!-- Informasi Pengguna -->
+                <div>
+                  <p class="text-lg font-semibold"><%= user.fullName %></p>
+                  <p class="text-gray-600 text-sm">Email: <%= user.email %></p>
+                  <p class="text-gray-600 text-sm">NIM: <%= user.studentId || '-' %></p>
+                  <p class="text-gray-600 text-sm">Fakultas: <%= user.faculty || '-' %> | Jurusan: <%= user.major || '-' %></p>
+                  <p class="text-gray-600 text-sm">Status Akun: 
+                    <span class="<%= user.isActive ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' %>">
+                      <%= user.isActive ? 'Aktif' : 'Nonaktif' %>
+                    </span>
+                  </p>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="flex flex-col md:flex-row gap-2 mt-4 md:mt-0">
+                  <% if (user.isActive) { %>
+                    <form action="/admin/users/deactivate/<%= user.id %>" method="POST">
+                      <button type="submit"
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-5 py-2 rounded-lg transition">
+                        Nonaktifkan
+                      </button>
+                    </form>
+                  <% } else { %>
+                    <form action="/admin/users/activate/<%= user.id %>" method="POST">
+                      <button type="submit"
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg transition">
+                        Aktifkan
+                      </button>
+                    </form>
+                  <% } %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <%- include('../layout/footer') %>
+</body>
+</html>
