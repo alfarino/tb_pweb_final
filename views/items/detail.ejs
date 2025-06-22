@@ -37,7 +37,7 @@
 <% if (user?.isAdmin) { %>
   <%- include('../admin/adminnavbar') %>
 <% } else { %>
-  <%- include('layout/navbar') %>
+  <%- include('../layout/navbar') %>
 <% } %>
 
   <% if (errorMessage && errorMessage.length > 0) { %>
