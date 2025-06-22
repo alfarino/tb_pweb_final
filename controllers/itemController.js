@@ -59,7 +59,7 @@ exports.getItemList = async (req, res) => {
 
      // Tambahkan array tombol di sini
     const tombol = [
-      { label: 'WTB', link: '/wtb' },
+      { label: 'WTB', link: '/wtb/beranda-wtb' },
       { label: 'Rekomendasi', link: '/recommendations' },
       {}, {}, {}, {}, {} // 5 slot kosong
     ];

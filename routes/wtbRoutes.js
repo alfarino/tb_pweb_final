@@ -12,8 +12,6 @@ router.get("/beranda", wtbController.getBerandaPartial);
 router.get("/post-saya", wtbController.getPostSayaPartial);
 router.get("/komentar-saya", wtbController.getKomentarSayaPartial);
 
-router.get("/beranda-wtb", (req, res) => {
-  res.render("wtb/partials/beranda-wtb");
-});
+router.get("/beranda-wtb", wtbController.getBerandaPartial);
 
 module.exports = router;
