@@ -1,27 +1,29 @@
 <!-- Navbar Pengguna -->
-<nav class="bg-green-600 text-white px-6 py-3 flex justify-between items-center">
+<nav class="bg-green-600 text-white px-6 flex justify-between items-center">
   <!-- Logo -->
   <div class="font-bold text-lg">CampusExchange</div>
 
   <!-- Search bar -->
-  <form action="/search" method="GET" class="mx-6 flex-1 max-w-md">
+  <form action="/search" method="GET" class="flex-grow mx-6">
     <input type="text" name="q" placeholder="Cari produk..."
       class="w-full px-4 py-2 rounded border border-gray-300 text-black focus:outline-none focus:ring-2 focus:ring-green-500" />
   </form>
 
   <!-- Menu dan Profil -->
-  <div class="flex items-center space-x-3">
+  <div class="flex items-center space-x-4">
+    <!-- Menu -->
     <a href="/" class="px-4 py-2 rounded hover:bg-green-800 bg-white text-green-600 hover:text-white font-semibold transition">Home</a>
     <a href="/product" class="px-4 py-2 rounded hover:bg-green-800 bg-white text-green-600 hover:text-white font-semibold transition">Produk</a>
     <a href="/keranjang" class="px-4 py-2 rounded hover:bg-green-800 bg-white text-green-600 hover:text-white font-semibold transition">Keranjang</a>
 
     <!-- Profil -->
-    <div class="relative top-3">
+    <div class="relative">
       <button id="profileBtn" class="focus:outline-none">
         <img src="/images/profil.jpg" alt="Foto Profil"
           class="w-9 h-9 rounded-full border-2 border-white shadow-md hover:scale-110 transition" />
       </button>
 
+      <!-- Dropdown Menu -->
       <div id="dropdownMenu"
         class="hidden absolute right-0 mt-2 w-56 bg-white text-gray-800 rounded-xl shadow-xl z-50 overflow-hidden">
 
@@ -40,17 +42,24 @@
         </div>
 
         <!-- Menu -->
-        <a href="/profile/main-profile" class="flex items-center gap-2 px-5 py-3 text-sm font-medium hover:bg-gray-100 <%= currentUrl === '/profile/main-profile' ? 'bg-gray-100 text-green-600' : 'text-gray-700' %>">
+        <a href="/profile/main-profile"
+          class="flex items-center gap-2 px-5 py-3 text-sm font-medium hover:bg-gray-100
+            <%= currentUrl === '/profile/main-profile' ? 'bg-gray-100 text-green-600' : 'text-gray-700' %>">
           <span>👤</span><span>Profil Saya</span>
         </a>
-        <a href="/profile/product" class="flex items-center gap-2 px-5 py-3 text-sm font-medium hover:bg-gray-100 <%= currentUrl === '/profile/product' ? 'bg-gray-100 text-green-600' : 'text-gray-700' %>">
+        <a href="/profile/product"
+          class="flex items-center gap-2 px-5 py-3 text-sm font-medium hover:bg-gray-100
+            <%= currentUrl === '/profile/product' ? 'bg-gray-100 text-green-600' : 'text-gray-700' %>">
           <span>📦</span><span>Produk Saya</span>
         </a>
-        <a href="/riwayat" class="flex items-center gap-2 px-5 py-3 text-sm font-medium hover:bg-gray-100 <%= currentUrl?.startsWith('/riwayat') ? 'bg-gray-100 text-green-600' : 'text-gray-700' %>">
+        <a href="/riwayat"
+          class="flex items-center gap-2 px-5 py-3 text-sm font-medium hover:bg-gray-100
+            <%= currentUrl?.startsWith('/riwayat') ? 'bg-gray-100 text-green-600' : 'text-gray-700' %>">
           <span>🕓</span><span>Riwayat</span>
         </a>
         <hr class="my-1 border-gray-200">
-        <a href="/logout" class="flex items-center gap-2 px-5 py-3 text-sm font-medium text-red-600 hover:bg-red-50">
+        <a href="/logout"
+          class="flex items-center gap-2 px-5 py-3 text-sm font-medium text-red-600 hover:bg-red-50">
           <span>🚪</span><span>Keluar</span>
         </a>
       </div>

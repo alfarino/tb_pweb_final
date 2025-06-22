@@ -162,3 +162,27 @@ exports.rejectUser = async (req, res) => {
     res.redirect('/admin/users/approval');
   }
 };
+
+exports.getAdminEditProfile = async (req, res) => {
+  try {
+    const adminId = req.session.user.id;
+
+    const admin = await prisma.user.findUnique({
+      where: { id: adminId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        fullName: true,
+        phoneNumber: true,
+        major: true,
+        isAdmin: true
+      }
+    });
+
+    res.render('admin/adminedit-profile', { user: admin });
+  } catch (err) {
+    console.error('Gagal load form edit admin profile:', err);
+    res.status(500).send('Internal Server Error');
+  }
+};
