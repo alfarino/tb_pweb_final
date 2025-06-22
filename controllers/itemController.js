@@ -403,3 +403,57 @@ exports.deleteItem = async (req, res) => {
   req.session.success = "Produk berhasil dihapus!";
   res.redirect('/profile/product');
 };
+
+const { sendProductDeletedEmail } = require('../utils/productdeletionmailer'); // Import util baru
+
+exports.deleteItem = async (req, res) => {
+  const itemId = parseInt(req.params.id);
+  const userId = req.session.user.id;
+
+  const item = await prisma.item.findUnique({
+    where: { id: itemId },
+    include: {
+      itemImages: true,
+      carts: { include: { user: true } },
+      wishlists: { include: { user: true } },
+      transaksi: {include: {pembeli: true,penjual: true}}
+
+    }
+  });
+
+  if (!item || item.userId !== userId) {
+    return res.status(403).send("Akses ditolak");
+  }
+
+  // Ambil semua email unik dari relasi yang terlibat
+  const notifiedEmails = new Set();
+
+  const addEmail = (email) => {
+    if (email && !notifiedEmails.has(email)) {
+      notifiedEmails.add(email);
+    }
+  };
+
+item.carts.forEach(c => addEmail(c.user.email));
+item.wishlists.forEach(w => addEmail(w.user.email));
+item.transaksi.forEach(t => {
+  if (t.pembeli) addEmail(t.pembeli.email); // ✅ ini yang penting
+});
+
+
+  for (const email of notifiedEmails) {
+    await sendProductDeletedEmail(email, item.title).catch(console.error);
+  }
+
+  // Hapus semua gambar di Cloudinary
+  for (const image of item.itemImages) {
+    const publicId = getCloudinaryPublicId(image.imageUrl);
+    if (publicId) await cloudinary.uploader.destroy(publicId).catch(() => {});
+  }
+
+  await prisma.item.delete({ where: { id: itemId } });
+
+  req.session.success = "Produk berhasil dihapus!";
+  res.redirect('/profile/product');
+};
+

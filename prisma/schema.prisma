@@ -19,8 +19,8 @@ model Cart {
   itemId   Int
   quantity Int
 
-  user User @relation(fields: [userId], references: [id])
-  item Item @relation(fields: [itemId], references: [id])
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item    Item  @relation(fields: [itemId], references: [id], onDelete: Cascade)
 }
 
 // ============= MASTER TABLES (MAX 3) =============
@@ -152,9 +152,9 @@ model Transaksi {
   updatedAt   DateTime         @updatedAt // Tanggal diperbarui secara otomatis
 
   // Relasi
-  pembeli User @relation("TransaksiPembeli", fields: [pembeliId], references: [id])
-  penjual User @relation("TransaksiPenjual", fields: [penjualId], references: [id])
-  item    Item @relation("ItemTransaksi", fields: [itemId], references: [id])
+  pembeli User @relation("TransaksiPembeli", fields: [pembeliId], references: [id], onDelete: Cascade)
+  penjual User @relation("TransaksiPenjual", fields: [penjualId], references: [id], onDelete: Cascade)
+  item    Item  @relation("ItemTransaksi", fields: [itemId], references: [id], onDelete: Cascade)
 
   @@index([pembeliId])
   @@index([penjualId])
