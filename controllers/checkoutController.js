@@ -1,4 +1,7 @@
 const prisma = require('../prisma/client');
+const puppeteer = require('puppeteer');
+const path = require('path');
+const fs = require('fs');
 
 exports.renderCheckoutPage = async (req, res) => {
   const itemId = parseInt(req.params.id);
@@ -27,77 +30,6 @@ exports.renderCheckoutPage = async (req, res) => {
     res.status(500).send('Terjadi kesalahan');
   }
 };
-
-
-// exports.processCheckout = async (req, res) => {
-//   const userId = req.session.user.id;
-//   const { itemId, selectedItems, jadwal, shift, lokasi } = req.body;
-
-//   try {
-//     // CASE 1: Checkout dari detail item
-//     if (itemId) {
-//       const item = await prisma.item.findUnique({
-//         where: { id: parseInt(itemId) },
-//         include: { user: true }
-//       });
-
-//       if (!item) return res.status(404).send('Item tidak ditemukan');
-//       if (item.userId === userId) return res.status(400).send('Tidak bisa beli barang sendiri');
-
-//       await prisma.transaksi.create({
-//         data: {
-//           itemId: item.id,
-//           pembeliId: userId,
-//           penjualId: item.user.id,
-//           jumlah: item.price,
-//           status: 'PENDING',
-//           statusBayar: 'UNPAID',
-//           lokasiCOD: lokasi,
-//           catatan: `Shift: ${shift}, Jadwal: ${jadwal}`
-//         }
-//       });
-
-//       return res.redirect('/checkout/sukses');
-//     }
-
-//     // CASE 2: Checkout dari keranjang (multiple)
-//     let ids = Array.isArray(selectedItems) ? selectedItems : [selectedItems];
-
-//     const carts = await prisma.cart.findMany({
-//       where: {
-//         id: { in: ids.map(id => parseInt(id)) },
-//         userId
-//       },
-//       include: {
-//         item: { include: { user: true } }
-//       }
-//     });
-
-//     for (const cart of carts) {
-//       if (cart.item.userId === userId) continue;
-
-//       await prisma.transaksi.create({
-//         data: {
-//           itemId: cart.item.id,
-//           pembeliId: userId,
-//           penjualId: cart.item.user.id,
-//           jumlah: cart.item.price * cart.quantity,
-//           status: 'PENDING',
-//           statusBayar: 'UNPAID',
-//           lokasiCOD: lokasi,
-//           catatan: `Shift: ${shift}, Jadwal: ${jadwal}`
-//         }
-//       });
-
-//       await prisma.cart.delete({ where: { id: cart.id } });
-//     }
-
-//     res.redirect('/checkout/sukses');
-//   } catch (err) {
-//     console.error('Error processCheckout:', err);
-//     res.status(500).send('Gagal melakukan checkout');
-//   }
-// };
 
 exports.processCheckout = async (req, res) => {
   const userId = req.session.user.id;
@@ -156,35 +88,6 @@ exports.processCheckout = async (req, res) => {
     res.redirect('/keranjang');
   }
 };
-
-// exports.renderSuccessPage = async (req, res) => {
-//   const userId = req.session.user.id;
-
-//   try {
-//     const transaksi = await prisma.transaksi.findFirst({
-//       where: { pembeliId: userId },
-//       orderBy: { createdAt: 'desc' },
-//       include: {
-//         item: {
-//           include: {
-//             itemImages: true
-//           }
-//         },
-//         pembeli: true,
-//         penjual: true
-//       }
-//     });
-
-//     if (!transaksi) {
-//       return res.status(404).send('Transaksi tidak ditemukan');
-//     }
-
-//     res.render('checkout/sukses', { transaksi });
-//   } catch (error) {
-//     console.error('Error renderSuccessPage:', error);
-//     res.status(500).send('Terjadi kesalahan saat menampilkan transaksi');
-//   }
-// };
 
 exports.renderSuccessPage = async (req, res) => {
   const userId = req.session.user.id;
@@ -279,52 +182,6 @@ exports.processMultipleCheckout = async (req, res) => {
   }
 };
 
-
-// exports.renderMultipleCheckoutPage = async (req, res) => {
-//   const userId = req.session.user.id;
-//   const selectedIds = req.query.selectedItems;
-
-//   // ❗ Tangkap jika tidak ada item dipilih
-//   if (!selectedIds) {
-//     req.flash('error', 'Silahkan pilih barang terlebih dahulu');
-//     return res.redirect('/keranjang');
-//   }
-
-//   // ❗ Tangkap jika selectedIds tidak valid (bukan angka)
-//   const itemIds = Array.isArray(selectedIds) ? selectedIds : [selectedIds];
-//   const parsedIds = itemIds.map(id => parseInt(id)).filter(id => !isNaN(id));
-
-//   if (parsedIds.length === 0) {
-//     req.flash('error', 'Data item tidak valid');
-//     return res.redirect('/keranjang');
-//   }
-
-//   try {
-//     const carts = await prisma.cart.findMany({
-//       where: {
-//         id: { in: parsedIds },
-//         userId
-//       },
-//       include: {
-//         item: {
-//           include: { itemImages: true, user: true }
-//         }
-//       }
-//     });
-
-//     if (carts.length === 0) {
-//       req.flash('error', 'Tidak ada item valid untuk checkout');
-//       return res.redirect('/keranjang');
-//     }
-
-//     res.render('checkout/checkout', { carts });
-//   } catch (err) {
-//     console.error('Error renderMultipleCheckoutPage:', err);
-//     req.flash('error', 'Gagal menampilkan halaman checkout');
-//     res.redirect('/keranjang');
-//   }
-// };
-
 exports.renderCheckoutPage = async (req, res) => {
   const userId = req.session.user.id;
   const idsParam = req.query.ids;
@@ -395,6 +252,11 @@ exports.konfirmasiPesanan = async (req, res) => {
       await prisma.item.update({
         where: { id: transaksi.itemId },
         data: { isAvailable: false }
+      });
+    } else if (newStatus === 'CANCELLED') {
+      await prisma.item.update({
+        where: { id: transaksi.itemId },
+        data: { isAvailable: true }
       });
     }
 
@@ -470,3 +332,61 @@ exports.completeTransaksi = async (req, res) => {
     }
 };
 
+exports.generatePDF = async (req, res) => {
+  const { ids } = req.query;
+  const url = `http://localhost:3000/checkout/pdf-view?ids=${ids}`;
+
+  try {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    // Akses halaman sukses
+    await page.goto(url, { waitUntil: 'networkidle0' });
+
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true
+    });
+
+    await browser.close();
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="bukti-transaksi.pdf"',
+      'Content-Length': pdfBuffer.length
+    });
+
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error('Gagal generate PDF:', err);
+    res.status(500).send('Gagal generate PDF');
+  }
+};
+
+exports.generatePDFPublic = async (req, res) => {
+  const idParams = req.query.ids;
+
+  if (!idParams) return res.status(400).send('ID transaksi tidak diberikan');
+
+  const idArray = idParams.split(',').map(id => parseInt(id)).filter(Boolean);
+
+  try {
+    const transaksiList = await prisma.transaksi.findMany({
+      where: {
+        id: { in: idArray }
+        // hilangkan filter pembeliId jika route ini publik
+      },
+      include: {
+        item: { include: { itemImages: true } },
+        pembeli: true,
+        penjual: true
+      }
+    });
+
+    // Render halaman khusus untuk PDF
+    res.render('checkout/pdf-view', { transaksi: transaksiList });
+  } catch (err) {
+    console.error('Error renderPDF view:', err);
+    res.status(500).send('Gagal memuat transaksi');
+  }
+};

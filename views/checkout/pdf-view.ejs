@@ -2,14 +2,14 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Transaksi Berhasil</title>
+  <title>Bukti Transaksi</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-white min-h-screen flex flex-col">
-  <%- include('../layout/navbar') %>
 
-  <main class="flex-grow container mx-auto px-4 py-6">
-    <div class="max-w-3xl mx-auto bg-gray-100 p-6 rounded shadow-md">
+<body class="bg-white p-6 text-sm text-gray-800">
+  <h1 class="text-2xl font-bold text-center text-green-700 mb-6">Bukti Transaksi</h1>
+
+  <div class="max-w-3xl mx-auto bg-gray-100 p-6 rounded shadow-md">
       <h1 class="text-2xl font-bold text-green-600 mb-4">Transaksi Berhasil ✅</h1>
       <p class="text-gray-700 mb-6">Berikut detail transaksi Anda:</p>
 
@@ -52,22 +52,6 @@
           </div>
         </div>
       <% }) %>
-
-      <!-- Tombol aksi -->
-      <div class="text-center mt-6 space-x-2">
-        <a href="/items" 
-           class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition">
-          Kembali ke Beranda
-        </a>
-
-        <a href="/checkout/pdf?ids=<%= transaksi.map(t => t.id).join(',') %>" 
-           class="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition">
-          Download PDF
-        </a>
-      </div>
     </div>
-  </main>
-
-  <%- include('../layout/footer') %>
 </body>
 </html>

@@ -32,7 +32,7 @@
 
         <!-- Riwayat Toggle -->
         <div>
-          <button onclick="toggleRiwayat()" class="w-full px-6 py-3 flex items-center justify-between hover:bg-gray-100 font-medium text-blue-600 focus:outline-none">
+          <button onclick="toggleRiwayat()" class="w-full px-6 py-3 flex items-center justify-between bg-gray-100 font-medium text-blue-600 focus:outline-none">
             <div class="flex items-center space-x-3">
               <span>📊</span>
               <span class="text-gray-700">Riwayat</span>
@@ -59,23 +59,29 @@
         <% } else { %>
           <div class="space-y-6">
             <% penjualan.forEach(item => { %>
-              <div class="flex items-start bg-gray-50 border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                <img src="<%= item.item.itemImages[0]?.imageUrl || 'https://via.placeholder.com/150' %>" 
-                     alt="Produk" 
-                     class="w-24 h-24 object-cover rounded mr-4">
+              <div class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-6 pr-8 hover:shadow-md transition">
+                <!-- Kiri: Image + detail -->
+                <div class="flex items-start">
+                  <img src="<%= item.item.itemImages[0]?.imageUrl || 'https://via.placeholder.com/150' %>" 
+                      alt="Produk" 
+                      class="w-24 h-24 object-cover rounded">
 
-                <div class="flex-1">
-                  <h2 class="text-lg font-semibold text-gray-800"><%= item.item.title %></h2>
-                  <p class="text-gray-600">Harga Terjual: Rp<%= Number(item.item.price).toLocaleString('id-ID') %></p>
-                  <p class="text-gray-600">Tanggal Terjual: <%= item.updatedAt.toLocaleDateString('id-ID') %></p>
-                  <% if (item.status === 'IN_PROGRESS') { %>
-                    <form action="/profile/complete/<%= item.id %>" method="POST" class="mt-2">
-                      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                        Completed
-                      </button>
-                    </form>
-                  <% } %>
+                  <div class="ml-4 space-y-1">
+                    <h2 class="text-lg font-bold text-gray-900"><%= item.item.title %></h2>
+                    <p class="text-base font-medium text-gray-700">Harga Terjual: Rp<%= Number(item.item.price).toLocaleString('id-ID') %></p>
+                    <p class="text-base font-medium text-gray-700">Tanggal Terjual: <%= item.updatedAt.toLocaleDateString('id-ID') %></p>
+                  </div>
                 </div>
+
+                <!-- Kanan: Button jika IN_PROGRESS -->
+                <% if (item.status === 'IN_PROGRESS') { %>
+                  <form action="/profile/complete/<%= item.id %>" method="POST">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                      Completed
+                    </button>
+                  </form>
+                <% } %>
+
               </div>
             <% }) %>
           </div>

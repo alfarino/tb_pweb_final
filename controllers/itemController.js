@@ -88,6 +88,7 @@ exports.getUserProducts = async (req, res) => {
       id: item.id,
       title: item.title,
       price: parseFloat(item.price),
+      isAvailable: item.isAvailable,  // ⬅️ Tambahkan ini!
       status: item.status,
       imageUrl: item.itemImages[0]?.imageUrl?.trim() || null
     }));
