@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Profil Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <%- include('adminnavbar') %>
+
+  <main class="max-w-xl mx-auto mt-10 bg-white p-6 rounded-lg shadow">
+    <h1 class="text-2xl font-bold mb-4 text-green-600">Edit Profil Admin</h1>
+    
+    <% if (success) { %>
+      <div class="bg-green-100 text-green-800 px-4 py-2 rounded mb-4">
+        <%= success %>
+      </div>
+    <% } %>
+
+    <form action="/admin/adminedit-profile" method="POST" class="space-y-4">
+      <div>
+        <label class="block font-semibold mb-1">Nama Lengkap</label>
+        <input type="text" name="fullName" value="<%= user.fullName %>" required
+               class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+      </div>
+
+      <div>
+        <label class="block font-semibold mb-1">Username</label>
+        <input type="text" name="username" value="<%= user.username %>" required
+               class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+      </div>
+
+      <div class="text-right">
+        <button type="submit"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+          Simpan Perubahan
+        </button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>
