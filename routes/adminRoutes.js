@@ -18,5 +18,8 @@ router.post('/adminedit-profile', adminController.updateAdminProfile);
 router.get('/database-users', requireAdmin, adminController.getApprovedUsers);
 router.post('/users/activate/:id', requireAdmin, adminController.activateUser);
 router.post('/users/deactivate/:id', requireAdmin, adminController.deactivateUser);
+router.get('/database-items', adminController.getApprovedItems);
+router.post('/items/delete/:id', adminController.deleteItem);
+
 
 module.exports = router;

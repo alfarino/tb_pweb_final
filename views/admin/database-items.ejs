@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kelola Produk - Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <%- include('adminnavbar') %>
+
+  <div class="flex flex-1">
+    <!-- Sidebar -->
+    <%- include('adminsidebar', { currentUrl: '/admin/database-items' }) %>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-10 overflow-y-auto">
+      <div class="bg-white rounded-xl shadow-md p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Kelola Produk</h1>
+
+        <!-- SweetAlert2 Success Notification -->
+        <% if (typeof success !== 'undefined' && success) { %>
+          <script>
+            document.addEventListener('DOMContentLoaded', function () {
+              Swal.fire({
+                icon: 'success',
+                title: 'Sukses!',
+                text: '<%= success %>',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+              });
+            });
+          </script>
+        <% } %>
+
+        <% if (items.length === 0) { %>
+          <p class="text-gray-500 text-center py-10">Belum ada produk yang disetujui.</p>
+        <% } else { %>
+          <div class="grid gap-6">
+            <% items.forEach(item => { %>
+              <div class="bg-gray-50 p-5 rounded-lg shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center">
+                
+                <!-- Informasi Produk -->
+                <div>
+                  <p class="text-lg font-semibold"><%= item.title %></p>
+                  <p class="text-gray-600 text-sm">Harga: Rp<%= parseInt(item.price).toLocaleString() %></p>
+                  <p class="text-gray-600 text-sm">Kategori: <%= item.category %> | Kondisi: <%= item.condition %></p>
+                  <p class="text-gray-600 text-sm">Status Produk: 
+                    <span class="<%= item.isActive ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' %>">
+                      <%= item.isActive ? 'Aktif' : 'Nonaktif' %>
+                    </span>
+                  </p>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="flex flex-col md:flex-row gap-2 mt-4 md:mt-0">
+                  <form action="/admin/items/delete/<%= item.id %>" method="POST" onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
+                    <button type="submit"
+                      class="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2 rounded-lg transition">
+                      Hapus
+                    </button>
+                  </form>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <%- include('../layout/footer') %>
+</body>
+</html>
