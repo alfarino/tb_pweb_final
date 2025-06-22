@@ -100,6 +100,7 @@ exports.login = async (req, res) => {
       email: user.email,
       fullName: user.fullName,
       isAdmin: user.isAdmin,
+      faculty: user.faculty
     };
 
     if (user.isAdmin) {
