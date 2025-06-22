@@ -2,6 +2,9 @@
   const { generateUsername, generatePassword } = require('../utils/generateCred');
   const { sendAccountEmailToUser, sendRejectionEmail } = require('../utils/mailer');
   const bcrypt = require('bcrypt');
+  const csvParser = require('csv-parser');
+  const fs = require('fs');
+  const path = require('path');
 
   // ============================== 
   // DASHBOARD
@@ -354,8 +357,60 @@ exports.completeTransaction = async (req, res) => {
   res.redirect('/admin/database-transactions');
 };
 
+exports.uploadUserCSV = async (req, res) => {
+  if (!req.file) {
+    req.session.success = 'File CSV tidak ditemukan.';
+    return res.redirect('/admin/userapproval');
+  }
+
+  const filePath = req.file.path;
+  const results = [];
+
+  fs.createReadStream(filePath)
+  .pipe(csvParser()) // ✅ sesuai dengan const csvParser = require('csv-parser');
+    .on('data', (data) => results.push(data))
+    .on('end', async () => {
+      try {
+        for (const userData of results) {
+          if (!userData.email || !userData.fullName || !userData.password) continue;
+
+          const existing = await prisma.user.findUnique({ where: { email: userData.email } });
+          if (existing) continue;
+
+          const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+          await prisma.user.create({
+            data: {
+              email: userData.email,
+              fullName: userData.fullName,
+              password: hashedPassword,
+              studentId: userData.studentId || null,
+              university: userData.university || null,
+              faculty: userData.faculty || null,
+              major: userData.major || null,
+              phoneNumber: userData.phoneNumber || null,
+              isVerified: false,
+              isApproved: false,
+              isActive: true,
+              username: generateUsername(userData.fullName),
+            }
+          });
+        }
+
+        req.session.success = 'Data pengguna dari CSV berhasil diimpor.';
+      } catch (err) {
+        console.error('Upload CSV error:', err);
+        req.session.success = 'Terjadi kesalahan saat mengimpor data.';
+      } finally {
+        fs.unlink(filePath, () => {}); // Hapus file setelah selesai
+        res.redirect('/admin/userapproval');
+      }
+    });
+};
+
 exports.cancelTransaction = async (req, res) => {
   const id = parseInt(req.params.id);
+
   try {
     await prisma.transaksi.update({
       where: { id },
@@ -363,13 +418,16 @@ exports.cancelTransaction = async (req, res) => {
         status: 'CANCELLED'
       }
     });
+
     req.session.success = 'Transaksi berhasil dibatalkan.';
   } catch (err) {
     console.error('Gagal membatalkan transaksi:', err);
     req.session.success = 'Gagal membatalkan transaksi.';
   }
+
   res.redirect('/admin/database-transactions');
 };
+
 
   exports.updateAdminProfile = async (req, res) => {
     try {
