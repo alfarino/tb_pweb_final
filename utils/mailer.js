@@ -8,14 +8,14 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-exports.sendAccountEmailToUser = async (to, name, username, password) => {
+exports.sendAccountEmailToUser = async (to, name, email, password) => {
   const html = `
     <div style="font-family:sans-serif;padding:20px">
       <h2>Halo, ${name}</h2>
       <p>Akun Anda di <strong>CampusExchange</strong> telah disetujui oleh admin.</p>
       <p>Berikut adalah detail login Anda:</p>
       <ul>
-        <li><strong>Username:</strong> ${username}</li>
+        <li><strong>Username:</strong> ${email}</li>
         <li><strong>Password:</strong> ${password}</li>
       </ul>
       <p>Silakan login di <a href="http://localhost:3000/login">sini</a>.</p>
