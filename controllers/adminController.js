@@ -8,13 +8,27 @@
   // ==============================
   exports.getAdminDashboard = async (req, res) => {
     try {
-      const pendingItems = await prisma.item.count({ where: { approvalStatus: 'pending' } });
-      const pendingUsers = await prisma.user.count({ where: { isApproved: false, isAdmin: false } });
-
+      const totalUsers = await prisma.user.count({
+        where: {
+          isApproved: true,
+          isAdmin: false
+        }
+      });
+  
+      const totalProducts = await prisma.item.count({
+        where: {
+          approvalStatus: 'approved',
+          isActive: true
+        }
+      });
+  
+      const totalOrders = await prisma.transaksi.count();
+  
       res.render('admin/admin-dashboard', {
-        pendingItems,
-        pendingUsers,
-        user: req.session.user,
+        totalUsers,
+        totalProducts,
+        totalOrders,
+        user: req.session.user
       });
     } catch (err) {
       console.error('Gagal memuat dashboard:', err);
