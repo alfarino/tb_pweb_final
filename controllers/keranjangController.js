@@ -30,25 +30,38 @@ exports.updateCartQuantity = async (req, res) => {
   const action = req.body.action;
 
   try {
-    const cart = await prisma.cart.findUnique({ where: { id: cartId } });
+    if (!['increase', 'decrease'].includes(action)) {
+      return res.status(400).send('Aksi tidak valid');
+    }
 
-    if (!cart) return res.status(404).send('Cart item not found');
+    const cart = await prisma.cart.findUnique({ where: { id: cartId }, include: { item: true } });
 
-    const updatedQty = action === 'increase'
-      ? cart.quantity + 1
-      : Math.max(1, cart.quantity - 1);
+    if (!cart) {
+      return res.status(404).send('Item keranjang tidak ditemukan');
+    }
 
-    await prisma.cart.update({
-      where: { id: cartId },
-      data: { quantity: updatedQty }
-    });
+    let updatedQty = cart.quantity;
+
+    if (action === 'increase') {
+      updatedQty += 1;
+    } else if (action === 'decrease' && cart.quantity > 1) {
+      updatedQty -= 1;
+    }
+
+    if (updatedQty !== cart.quantity) {
+      await prisma.cart.update({
+        where: { id: cartId },
+        data: { quantity: updatedQty }
+      });
+    }
 
     res.redirect('/keranjang');
   } catch (error) {
     console.error('Error updateCartQuantity:', error);
-    res.status(500).send('Gagal memperbarui jumlah');
+    res.status(500).send('Terjadi kesalahan saat memperbarui jumlah');
   }
 };
+
 
 // Hapus item dari keranjang
 exports.deleteCartItem = async (req, res) => {

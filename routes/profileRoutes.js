@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const itemController = require('../controllers/itemController');
+const checkoutController = require('../controllers/checkoutController');
 const { requireLogin } = require('../middleware/auth'); 
 
 router.get('/edit-profile', (req, res) => {
@@ -39,5 +40,9 @@ router.get('/product', itemController.getUserProducts);
 router.get('/main-profile', itemController.getUserProfile);
 
 router.get('/history-buy', itemController.getRiwayatPembelian);
+
+router.get('/history-sell', itemController.getHistorySellPage);
+
+router.post('/complete/:id', checkoutController.completeTransaksi);
 
 module.exports = router;

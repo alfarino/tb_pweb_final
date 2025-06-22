@@ -139,6 +139,7 @@ exports.getRiwayatPembelian = async (req, res) => {
     });
 
     const dataPembelian = pembelian.map(t => ({
+      transaksiId: t.id, // ✅ tambahkan ID transaksi disini
       nama: t.item?.title || 'Barang tidak tersedia',
       jumlah: t.jumlah,
       gambar: t.item?.itemImages?.[0]?.imageUrl || null,
@@ -156,6 +157,41 @@ exports.getRiwayatPembelian = async (req, res) => {
     res.status(500).send('Terjadi kesalahan saat mengambil riwayat pembelian');
   }
 };
+
+// ✅ GET: Riwayat penjualan
+exports.getHistorySellPage = async (req, res) => {
+    const userId = req.session.user.id;
+
+    try {
+        const penjualan = await prisma.transaksi.findMany({
+            where: {
+                penjualId: userId,
+                status: { not: 'PENDING' }  // hanya tampilkan yg SUDAH diproses
+            },
+            include: {
+                item: {
+                    include: {
+                        itemImages: true
+                    }
+                },
+                pembeli: true
+            },
+            orderBy: {
+                updatedAt: 'desc'
+            }
+        });
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+
+        res.render('profile/history-sell', { penjualan, user });
+    } catch (err) {
+        console.error('Error getHistorySellPage:', err);
+        res.status(500).send('Gagal menampilkan riwayat penjualan');
+    }
+};
+
 
 // ✅ POST: Tambah produk
 exports.addItem = async (req, res) => {

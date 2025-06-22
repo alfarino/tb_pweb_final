@@ -8,7 +8,7 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
   <!-- Header -->
-  <div class="bg-green-600 h-6 w-full"></div>
+  <%- include('../layout/navbar') %>
 
   <div class="flex flex-1">
     <!-- Sidebar -->
@@ -16,33 +16,32 @@
       <div class="p-6 border-b border-gray-200">
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 bg-black rounded-full"></div>
-          <span class="text-gray-700 font-semibold">(Header)</span>
+          <span class="text-gray-700 font-semibold"><%= user?.fullName || '(Nama Akun)' %></span>
         </div>
       </div>
       <nav class="mt-4 space-y-1">
-        <a href="/profile" class="flex items-center space-x-3 px-6 py-3 hover:bg-gray-100">
+        <a href="/profile/main-profile" class="flex items-center space-x-3 px-6 py-3 hover:bg-gray-100 font-medium text-blue-600">
           <span>👤</span>
           <span class="text-gray-700">Akun Saya</span>
         </a>
 
-        <a href="/produk" class="flex items-center space-x-3 px-6 py-3 hover:bg-gray-100">
+        <a href="/profile/product" class="flex items-center space-x-3 px-6 py-3 hover:bg-gray-100 font-medium text-blue-600">
           <span>👜</span>
           <span class="text-gray-700">Produk Saya</span>
         </a>
 
         <!-- Riwayat Toggle -->
         <div>
-          <button onclick="toggleRiwayat()" class="w-full px-6 py-3 flex items-center justify-between hover:bg-gray-100 focus:outline-none">
+          <button onclick="toggleRiwayat()" class="w-full px-6 py-3 flex items-center justify-between hover:bg-gray-100 font-medium text-blue-600 focus:outline-none">
             <div class="flex items-center space-x-3">
               <span>📊</span>
-              <span class="text-blue-600 font-semibold">Riwayat</span>
+              <span class="text-gray-700">Riwayat</span>
             </div>
-            <span id="arrow-icon" class="text-gray-500 text-sm">&#9650;</span>
+            <span id="arrow-icon" class="text-gray-500 text-sm">&#9660;</span>
           </button>
-
           <div id="riwayatSubmenu" class="ml-14 mt-1 space-y-1">
-            <a href="/riwayat/pembelian" class="block text-gray-600 hover:text-blue-600">Pembelian</a>
-            <a href="/riwayat/penjualan" class="block text-blue-600 font-semibold">Penjualan</a>
+            <a href="/profile/history-buy" class="block text-gray-600 font-medium hover:text-blue-600 pt-4">Pembelian</a>
+            <a href="/profile/history-sell" class="block text-gray-600 font-medium hover:text-blue-600 pt-4">Penjualan</a>
           </div>
         </div>
       </nav>
@@ -61,14 +60,21 @@
           <div class="space-y-6">
             <% penjualan.forEach(item => { %>
               <div class="flex items-start bg-gray-50 border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                <img src="/uploads/items/<%= item.gambar %>" alt="Produk" class="w-24 h-24 object-cover rounded mr-4">
+                <img src="<%= item.item.itemImages[0]?.imageUrl || 'https://via.placeholder.com/150' %>" 
+                     alt="Produk" 
+                     class="w-24 h-24 object-cover rounded mr-4">
+
                 <div class="flex-1">
-                  <h2 class="text-lg font-semibold text-gray-800"><%= item.nama %></h2>
-                  <p class="text-gray-600">Harga Terjual: Rp<%= item.harga.toLocaleString() %></p>
-                  <p class="text-gray-600">Tanggal Terjual: <%= item.tanggal_terjual %></p>
-                  <p class="text-sm mt-1 font-medium <%= item.status === 'selesai' ? 'text-green-600' : item.status === 'dibatalkan' ? 'text-red-500' : 'text-yellow-600' %>">
-                    Status: <%= item.status %>
-                  </p>
+                  <h2 class="text-lg font-semibold text-gray-800"><%= item.item.title %></h2>
+                  <p class="text-gray-600">Harga Terjual: Rp<%= Number(item.item.price).toLocaleString('id-ID') %></p>
+                  <p class="text-gray-600">Tanggal Terjual: <%= item.updatedAt.toLocaleDateString('id-ID') %></p>
+                  <% if (item.status === 'IN_PROGRESS') { %>
+                    <form action="/profile/complete/<%= item.id %>" method="POST" class="mt-2">
+                      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                        Completed
+                      </button>
+                    </form>
+                  <% } %>
                 </div>
               </div>
             <% }) %>
@@ -91,7 +97,4 @@
     }
   </script>
 </body>
-<!-- res.render("riwayat/penjualan", { penjualan: dataPenjualan }); -->
-
 </html>
-

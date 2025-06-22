@@ -47,9 +47,16 @@
       <div class="bg-white rounded-xl shadow-md p-8">
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-3xl font-bold text-gray-800">Produk Saya</h1>
-          <button onclick="window.location.href='/items/add'" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-            Tambah Produk
-          </button>
+          <div class="flex gap-3">
+            <button onclick="window.location.href='/checkout/konfirmasi'" 
+                    class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition">
+              Konfirmasi Pesanan
+            </button>
+            <button onclick="window.location.href='/items/add'" 
+                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+              Tambah Produk
+            </button>
+          </div>
         </div>
 
         <!-- Notifikasi -->
@@ -88,9 +95,15 @@
                 <h2 class="text-lg font-semibold text-gray-800"><%= item.title %></h2>
                 <p class="text-gray-600">Harga: Rp<%= Number(item.price).toLocaleString('id-ID') %></p>
                 <p class="text-sm text-gray-500 mt-1">Status: <%= item.status %></p>
-                <div class="mt-4 flex justify-between text-sm text-blue-600">
-                  <a href="/items/edit/<%= item.id %>" class="hover:underline">Edit</a>
-                  <a href="#" onclick="confirmDelete('<%= item.id %>')" class="hover:underline text-red-500">Hapus</a>
+                <div class="mt-4 flex justify-between gap-2">
+                  <button onclick="window.location.href='/items/edit/<%= item.id %>'"
+                          class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-sm transition">
+                    Edit
+                  </button>
+                  <button onclick="confirmDelete('<%= item.id %>')"
+                          class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 text-sm transition">
+                    Hapus
+                  </button>
                 </div>
               </div>
             <% }) %>

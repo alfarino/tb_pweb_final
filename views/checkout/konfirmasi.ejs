@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Konfirmasi Pesanan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <%- include('../layout/navbar') %>
+
+    <!-- Main content -->
+    <main class="flex-grow p-6">
+        <!-- Judul -->
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-10">Konfirmasi Pesanan</h1>
+
+        <% if (transaksiList.length === 0) { %>
+            <p class="text-center text-gray-500 text-lg">Tidak ada pesanan untuk dikonfirmasi.</p>
+        <% } else { %>
+            <div class="space-y-8 max-w-5xl mx-auto">
+                <% transaksiList.forEach(trx => { %>
+                    <div class="flex bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 items-center border border-gray-200">
+                        <!-- Gambar Produk -->
+                        <div class="flex-shrink-0">
+                            <img src="<%= trx.item.itemImages[0]?.imageUrl || 'https://via.placeholder.com/150' %>"
+                                 alt="<%= trx.item.title %>" 
+                                 class="w-44 h-44 object-cover rounded-lg">
+                        </div>
+
+                        <!-- Detail Produk -->
+                        <div class="ml-6 flex-1">
+                            <h2 class="text-2xl font-semibold text-gray-800 mb-3"><%= trx.item.title %></h2>
+                            <p class="text-lg mb-1 text-gray-700">Harga: <span class="font-bold text-green-600">Rp <%= Number(trx.jumlah).toLocaleString('id-ID') %></span></p>
+                            <p class="text-gray-700 mb-1">Pembeli: <span class="font-medium"><%= trx.pembeli.username %></span></p>
+                            <p class="text-gray-700 mb-1">Lokasi COD: <span class="font-medium"><%= trx.lokasiCOD || '-' %></span></p>
+                            <p class="text-gray-700 mb-4">Status: 
+                                <% if (trx.status === 'PENDING') { %>
+                                    <span class="font-bold text-yellow-500"><%= trx.status %></span>
+                                <% } else if (trx.status === 'DITERIMA') { %>
+                                    <span class="font-bold text-green-500"><%= trx.status %></span>
+                                <% } else if (trx.status === 'DITOLAK') { %>
+                                    <span class="font-bold text-red-500"><%= trx.status %></span>
+                                <% } else { %>
+                                    <span class="font-bold text-gray-500"><%= trx.status %></span>
+                                <% } %>
+                            </p>
+
+                            <% if (trx.status === 'PENDING') { %>
+                                <form action="/checkout/konfirmasi/<%= trx.id %>" method="POST" class="flex gap-4">
+                                    <button type="submit" name="action" value="terima"
+                                        class="bg-green-600 text-white px-5 py-2 rounded-lg text-lg hover:bg-green-700 transition-all">Terima</button>
+                                    <button type="submit" name="action" value="tolak"
+                                        class="bg-red-600 text-white px-5 py-2 rounded-lg text-lg hover:bg-red-700 transition-all">Tolak</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </main>
+
+    <!-- Footer tetap di bawah -->
+    <%- include('../layout/footer') %>
+</body>
+</html>

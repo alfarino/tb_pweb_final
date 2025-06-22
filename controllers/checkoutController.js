@@ -280,29 +280,71 @@ exports.processMultipleCheckout = async (req, res) => {
 };
 
 
-exports.renderMultipleCheckoutPage = async (req, res) => {
-  const userId = req.session.user.id;
-  const selectedIds = req.query.selectedItems;
+// exports.renderMultipleCheckoutPage = async (req, res) => {
+//   const userId = req.session.user.id;
+//   const selectedIds = req.query.selectedItems;
 
-  // ❗ Tangkap jika tidak ada item dipilih
-  if (!selectedIds) {
-    req.flash('error', 'Silahkan pilih barang terlebih dahulu');
+//   // ❗ Tangkap jika tidak ada item dipilih
+//   if (!selectedIds) {
+//     req.flash('error', 'Silahkan pilih barang terlebih dahulu');
+//     return res.redirect('/keranjang');
+//   }
+
+//   // ❗ Tangkap jika selectedIds tidak valid (bukan angka)
+//   const itemIds = Array.isArray(selectedIds) ? selectedIds : [selectedIds];
+//   const parsedIds = itemIds.map(id => parseInt(id)).filter(id => !isNaN(id));
+
+//   if (parsedIds.length === 0) {
+//     req.flash('error', 'Data item tidak valid');
+//     return res.redirect('/keranjang');
+//   }
+
+//   try {
+//     const carts = await prisma.cart.findMany({
+//       where: {
+//         id: { in: parsedIds },
+//         userId
+//       },
+//       include: {
+//         item: {
+//           include: { itemImages: true, user: true }
+//         }
+//       }
+//     });
+
+//     if (carts.length === 0) {
+//       req.flash('error', 'Tidak ada item valid untuk checkout');
+//       return res.redirect('/keranjang');
+//     }
+
+//     res.render('checkout/checkout', { carts });
+//   } catch (err) {
+//     console.error('Error renderMultipleCheckoutPage:', err);
+//     req.flash('error', 'Gagal menampilkan halaman checkout');
+//     res.redirect('/keranjang');
+//   }
+// };
+
+exports.renderCheckoutPage = async (req, res) => {
+  const userId = req.session.user.id;
+  const idsParam = req.query.ids;
+
+  if (!idsParam) {
+    req.flash('error', 'Silakan pilih item terlebih dahulu');
     return res.redirect('/keranjang');
   }
 
-  // ❗ Tangkap jika selectedIds tidak valid (bukan angka)
-  const itemIds = Array.isArray(selectedIds) ? selectedIds : [selectedIds];
-  const parsedIds = itemIds.map(id => parseInt(id)).filter(id => !isNaN(id));
+  const selectedIds = idsParam.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
 
-  if (parsedIds.length === 0) {
-    req.flash('error', 'Data item tidak valid');
+  if (selectedIds.length === 0) {
+    req.flash('error', 'ID item tidak valid');
     return res.redirect('/keranjang');
   }
 
   try {
     const carts = await prisma.cart.findMany({
       where: {
-        id: { in: parsedIds },
+        id: { in: selectedIds },
         userId
       },
       include: {
@@ -319,8 +361,112 @@ exports.renderMultipleCheckoutPage = async (req, res) => {
 
     res.render('checkout/checkout', { carts });
   } catch (err) {
-    console.error('Error renderMultipleCheckoutPage:', err);
+    console.error('Error renderCheckoutPage:', err);
     req.flash('error', 'Gagal menampilkan halaman checkout');
-    res.redirect('/keranjang');
+    return res.redirect('/keranjang');
   }
 };
+
+exports.konfirmasiPesanan = async (req, res) => {
+  const transaksiId = parseInt(req.params.id);
+  const { action } = req.body;
+
+  try {
+    const transaksi = await prisma.transaksi.findUnique({
+      where: { id: transaksiId }
+    });
+
+    if (!transaksi) return res.status(404).send('Transaksi tidak ditemukan');
+
+    let newStatus = null;
+    if (action === 'terima') newStatus = 'IN_PROGRESS';
+    if (action === 'tolak') newStatus = 'CANCELLED';
+
+    if (!newStatus) return res.status(400).send('Aksi tidak valid');
+
+    // Step 1: Update status transaksi
+    await prisma.transaksi.update({
+      where: { id: transaksiId },
+      data: { status: newStatus }
+    });
+
+    // Step 2: Kalau diterima → update item isAvailable = false
+    if (newStatus === 'IN_PROGRESS') {
+      await prisma.item.update({
+        where: { id: transaksi.itemId },
+        data: { isAvailable: false }
+      });
+    }
+
+    res.redirect('/checkout/konfirmasi');
+  } catch (err) {
+    console.error('Error konfirmasiPesanan:', err);
+    res.status(500).send('Gagal mengkonfirmasi pesanan');
+  }
+};
+
+
+exports.renderKonfirmasiPage = async (req, res) => {
+  const userId = req.session.user.id;
+
+  try {
+    const transaksiList = await prisma.transaksi.findMany({
+  where: {
+    penjualId: userId,
+    status: 'PENDING'
+  },
+  include: {
+    item: {
+      include: {
+        itemImages: true  // nama relasi ke gambar
+      }
+    },
+    pembeli: true
+  }
+});
+
+
+    res.render('checkout/konfirmasi', { transaksiList });
+  } catch (err) {
+    console.error('Error renderKonfirmasiPage:', err);
+    res.status(500).send('Gagal menampilkan pesanan');
+  }
+};
+
+exports.handleKonfirmasi = async (req, res) => {
+    const transaksiId = parseInt(req.params.id);
+    const action = req.body.action; // 'terima' atau 'tolak'
+  
+    try {
+        await prisma.transaksi.update({
+            where: { id: transaksiId },
+            data: {
+                status: action === 'terima' ? 'DITERIMA' : 'DITOLAK'
+            }
+        });
+
+        res.redirect('/checkout/konfirmasi'); // balik ke halaman konfirmasi
+    } catch (err) {
+        console.error('Error handleKonfirmasi:', err);
+        res.status(500).send('Gagal mengupdate transaksi');
+    }
+};
+
+exports.completeTransaksi = async (req, res) => {
+    const trxId = Number(req.params.id);
+
+    try {
+        await prisma.transaksi.update({
+            where: { id: trxId },
+            data: {
+                status: 'COMPLETED' // kamu sesuaikan enum status
+            }
+        });
+
+        res.redirect('/profile/history-sell');
+    } catch (err) {
+        console.error('Error completeTransaksi:', err);
+        res.status(500).send('Gagal menyelesaikan transaksi');
+    }
+};
+
