@@ -1,0 +1,138 @@
+<!-- Beranda Content -->
+<div id="beranda" class="content-section" style="display:none;">
+  <div class="max-w-full mx-auto">
+    <!-- Form Post -->
+    <form action="/want-to-buy/create" method="POST" enctype="multipart/form-data">
+      <div class="max-w-full mx-auto">
+        <div class="bg-white rounded-xl shadow-md p-8 max-w-3xl mx-auto">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-black rounded-full"></div>
+          <span class="text-gray-700 font-semibold"><%= user?.fullName || '(Nama Akun)' %></span>
+        </div>
+      
+          
+          <!-- Formulir WTB -->
+          <div class="w-full sm:w-2/3">
+            <div class="mb-4">
+              <label for="title" class="block text-sm font-semibold text-gray-700">Nama Produk</label>
+              <input type="text" id="title" name="title" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required />
+            </div>
+
+            <div class="mb-4">
+              <label for="description" class="block text-sm font-semibold text-gray-700">Deskripsi</label>
+              <textarea id="description" name="description" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required></textarea>
+            </div>
+
+            <div class="mb-4">
+              <label for="maxPrice" class="block text-sm font-semibold text-gray-700">Harga Maksimal</label>
+              <input type="number" id="maxPrice" name="maxPrice" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div class="mb-4">
+              <label for="category" class="block text-sm font-semibold text-gray-700">Kategori</label>
+              <input type="text" id="category" name="category" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div class="mb-4">
+              <label for="preferredCondition" class="block text-sm font-semibold text-gray-700">Kondisi yang Diinginkan</label>
+              <input type="text" id="preferredCondition" name="preferredCondition" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div class="mb-4">
+              <label for="location" class="block text-sm font-semibold text-gray-700">Lokasi</label>
+              <input type="text" id="location" name="location" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div class="mb-4">
+              <label for="urgency" class="block text-sm font-semibold text-gray-700">Urgensi</label>
+              <select id="urgency" name="urgency" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                <option value="NORMAL">Normal</option>
+                <option value="URGENT">Urgent</option>
+              </select>
+            </div>
+
+            <!-- Tombol Post -->
+            <div class="flex items-center justify-end w-full mt-4 space-x-4">
+              <div class="flex space-x-4">
+                <!-- Ikon Gambar -->
+                <label for="image-upload" class="cursor-pointer text-blue-500 hover:text-blue-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+                  </svg>
+                </label>
+                <input type="file" id="image-upload" class="hidden" onchange="previewImage(event)" multiple />
+              </div>
+
+              <!-- Preview Gambar -->
+              <div id="image-preview-container" class="mt-4 hidden space-y-4">
+                <img id="image-preview" src="" alt="Preview" class="w-full h-auto rounded-md shadow-lg" />
+              </div>
+
+              <!-- Tombol Post -->
+              <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                POST
+              </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Fungsi untuk menampilkan preview gambar yang dipilih
+  function previewImage(event) {
+    const previewContainer = document.getElementById('image-preview-container');
+    const files = event.target.files;
+    
+    // Clear preview sebelumnya
+    previewContainer.innerHTML = '';
+    
+    // Tampilkan gambar-gambar yang dipilih
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        const image = document.createElement('img');
+        image.src = e.target.result;
+        image.classList.add('w-full', 'h-auto', 'rounded-md', 'shadow-lg');
+        
+        previewContainer.appendChild(image);
+      };
+      
+      reader.readAsDataURL(file);
+    });
+    
+    // Tampilkan kontainer gambar
+    previewContainer.classList.remove('hidden');
+  }
+</script>
+
+<!-- Modal Notifikasi -->
+<div id="success-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+  <div class="bg-white p-6 rounded-lg shadow-md max-w-sm w-full">
+    <div class="flex items-center justify-center text-blue-500">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+      </svg>
+    </div>
+    <p class="text-center text-xl">Berhasil ditambahkan</p>
+    <div class="mt-4 flex justify-center gap-4">
+      <button onclick="window.location.href='/beranda'" class="bg-blue-500 text-white px-4 py-2 rounded-full">Beranda</button>
+      <button onclick="window.location.href='/post-saya'" class="bg-blue-500 text-white px-4 py-2 rounded-full">Post Saya</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showSuccessModal() {
+    document.getElementById("success-modal").classList.remove("hidden");
+  }
+
+  function closeModal() {
+    document.getElementById("success-modal").classList.add("hidden");
+  }
+</script>

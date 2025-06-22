@@ -19,6 +19,7 @@ const flashMiddleware = require('./middleware/flash');
 // ✅ Import Controllers
 const authController = require('./controllers/authController');
 const itemController = require("./controllers/itemController");
+const wtbController = require('./controllers/wtbController');
 
 // ✅ Import Routes
 const itemRoutes = require("./routes/itemRoutes");
@@ -63,6 +64,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.post("/want-to-buy/create", wtbController.createWtbRequest);
 
 // ✅ Flash Middleware
 app.use(flashMiddleware);

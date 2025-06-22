@@ -39,128 +39,14 @@
   <div class="flex flex-1 px-64">
 
     <!-- Sidebar -->
-    <div class="w-64 bg-gray-800 text-white p-6">
-      <div class="flex flex-col mb-8">
-        <span class="ml-0 text-xl">Hallo</span>
-        <span class="ml-0 text-3xl mt-2">Mau cari apa?</span>
-      </div>
-      <!-- Menu Sidebar -->
-      <ul class="space-y-6">
-        <li>
-          <a href="javascript:void(0);" 
-             id="berandaMenu" 
-             class="menu-item text-gray-300 hover:text-white" 
-             onclick="showContent('beranda', 'berandaMenu')">Beranda</a>
-        </li>
-        <li>
-          <a href="javascript:void(0);" 
-             id="postSayaMenu" 
-             class="menu-item text-gray-300 hover:text-white" 
-             onclick="showContent('postSaya', 'postSayaMenu')">Post saya</a>
-        </li>
-        <li>
-          <a href="javascript:void(0);" 
-             id="komentarSayaMenu" 
-             class="menu-item text-gray-300 hover:text-white" 
-             onclick="showContent('komentarSaya', 'komentarSayaMenu')">Komentar saya</a>
-        </li>
-      </ul>
-    </div>
+    <%- include('partials/sidebar-wtb') %>
 
     <!-- Konten Utama -->
-    <div class="flex-1 bg-white p-6">
-      <!-- Beranda Content -->
-      <div id="beranda" class="content-section" style="display:none;">
-  <div class="max-w-3xl mx-auto">
-    <!-- Form Post -->
-    <form action="/want-to-buy/create" method="POST">
-      <div class="max-w-3xl mx-auto">
-      <!-- Flexbox untuk menampilkan Foto Profil dan Input Teks berdampingan -->
-      <div class="flex flex-col items-start space-y-4 bg-gray-100 p-6 rounded-lg shadow-sm">
-        <!-- Foto Profil -->
-        <button id="profileBtn" class="focus:outline-none">
-          <img src="/images/profil.jpg" alt="Foto Profil" class="w-12 h-12 rounded-full border-2 border-white shadow-md hover:scale-110 transition" />
-        </button>
-        
-        <!-- Formulir WTB -->
-        <div class="mb-4">
-          <label for="title" class="block text-sm font-semibold">Judul</label>
-            <input type="text" id="title" name="title" class="w-full p-3 border border-gray-300 rounded" required />
-        </div>
-
-        <div class="mb-4">
-          <label for="description" class="block text-sm font-semibold">Deskripsi</label>
-          <textarea id="description" name="description" class="w-full p-3 border border-gray-300 rounded" required></textarea>
-        </div>
-
-        <div class="mb-4">
-          <label for="maxPrice" class="block text-sm font-semibold">Harga Maksimal</label>
-          <input type="number" id="maxPrice" name="maxPrice" class="w-full p-3 border border-gray-300 rounded" />
-        </div>
-
-        <div class="mb-4">
-          <label for="category" class="block text-sm font-semibold">Kategori</label>
-          <input type="text" id="category" name="category" class="w-full p-3 border border-gray-300 rounded" />
-        </div>
-
-        <div class="mb-4">
-          <label for="preferredCondition" class="block text-sm font-semibold">Kondisi yang Diinginkan</label>
-          <input type="text" id="preferredCondition" name="preferredCondition" class="w-full p-3 border border-gray-300 rounded" />
-        </div>
-
-        <div class="mb-4">
-          <label for="location" class="block text-sm font-semibold">Lokasi</label>
-          <input type="text" id="location" name="location" class="w-full p-3 border border-gray-300 rounded" />
-        </div>
-
-        <div class="mb-4">
-          <label for="urgency" class="block text-sm font-semibold">Urgensi</label>
-          <select id="urgency" name="urgency" class="w-full p-3 border border-gray-300 rounded">
-          <option value="NORMAL">Normal</option>
-          <option value="URGENT">Urgent</option>
-          </select>
-        </div>
-
-        <!-- Tombol dan Ikon berada di kanan bawah -->
-        <div class="flex items-center justify-end w-full mt-4 space-x-4">
-          <div class="flex space-x-4">
-            <!-- Ikon Gambar -->
-            <label for="image-upload" class="cursor-pointer text-blue-500 hover:text-blue-700">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
-              </svg>
-            </label>
-            <input type="file" id="image-upload" class="hidden" />
-          </div>
-          
-          <!-- Tombol Post -->
-          <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-            POST
-          </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-      <!-- Post Saya Content -->
-      <div id="postSaya" class="content-section" style="display:none;">
-        <div class="max-w-3xl mx-auto">
-          <h1 class="text-2xl font-semibold mb-4">Post Saya</h1>
-          <p>Ini adalah halaman Post Saya.</p>
-        </div>
-      </div>
-
-      <!-- Komentar Saya Content -->
-      <div id="komentarSaya" class="content-section" style="display:none;">
-        <div class="max-w-3xl mx-auto">
-          <h1 class="text-2xl font-semibold mb-4">Komentar Saya</h1>
-          <p>Ini adalah halaman Komentar Saya.</p>
-        </div>
-      </div>
-
+    <div class="flex-1 bg-gray-100 p-6">
+      <!-- Meng-include Partial Views -->
+      <%- include('partials/beranda-wtb') %>
+      <%- include('partials/postSaya') %>
+      <%- include('partials/komentarSaya') %>
     </div>
 
   </div>

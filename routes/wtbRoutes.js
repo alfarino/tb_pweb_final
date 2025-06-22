@@ -1,8 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { getWantToBuyPage } = require("../controllers/wtbController");  // Mengimpor controller
+const wtbController = require("../controllers/wtbController"); // Pastikan ini benar
 
-// Menambahkan route untuk halaman Want to Buy
-router.get("/", getWantToBuyPage);
+// Menangani POST request untuk membuat WTB request
+router.post("/create", wtbController.createWtbRequest);
+
+// Menangani GET request untuk halaman WTB
+router.get("/", wtbController.getWantToBuyPage);
 
 module.exports = router;
