@@ -135,7 +135,7 @@
         }
       });
 
-      await sendAccountEmailToUser(user.email, user.fullName, username, password);
+      await sendAccountEmailToUser(user.email, user.fullName, username, plainPassword);
       req.session.success = 'Pengguna berhasil disetujui!';
     } catch (err) {
       console.error('Approval Error:', err);
