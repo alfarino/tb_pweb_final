@@ -100,36 +100,39 @@
     }
   };
 
-  exports.approveUser = async (req, res) => {
-    const userId = parseInt(req.params.id);
-    try {
-      const user = await prisma.user.findUnique({ where: { id: userId } });
-      if (!user || user.isApproved) return res.redirect('/admin/userapproval');
+exports.approveUser = async (req, res) => {
+  const userId = parseInt(req.params.id);
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.isApproved) return res.redirect('/admin/userapproval');
 
     const username = generateUsername(user.fullName);
-    const plainPassword = generatePassword();
-    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+    const plainPassword = generatePassword(); // ✅ ini yang akan dikirim ke email
+    const hashedPassword = await bcrypt.hash(plainPassword, 10); // ✅ ini disimpan di DB
 
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          username,
-          password: hashedPassword,
-          isApproved: true,
-          approvedById: req.session.user.id,
-          approvedAt: new Date()
-        }
-      });
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        username,
+        password: hashedPassword,
+        isApproved: true,
+        approvedById: req.session.user.id,
+        approvedAt: new Date()
+      }
+    });
 
-      await sendAccountEmailToUser(user.email, user.fullName, username, password);
-      req.session.success = 'Pengguna berhasil disetujui!';
-    } catch (err) {
-      console.error('Approval Error:', err);
-      req.session.success = 'Gagal menyetujui pengguna.';
-    }
+    // ✅ Kirim yang plainPassword, bukan password
+    await sendAccountEmailToUser(user.email, user.fullName, username, plainPassword);
+
+    req.session.success = 'Pengguna berhasil disetujui!';
+  } catch (err) {
+    console.error('Approval Error:', err.message);
+    res.status(500).send('Gagal menyetujui pengguna.');
+  }
 
   res.redirect('/admin/userapproval');
-  };
+};
+
 
   exports.rejectUser = async (req, res) => {
     const userId = parseInt(req.params.id);
