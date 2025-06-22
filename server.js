@@ -90,6 +90,11 @@ app.use('/', authRoutes);
 app.get("/", requireLogin, itemController.getItemList);
 app.get("/product", requireLogin, itemController.getUserProducts);
 
+//recommendations
+const recommendationRoutes = require('./routes/recommendationRoutes');
+app.use('/recommendations', requireLogin, recommendationRoutes);
+
+
 // ✅ Start Server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
