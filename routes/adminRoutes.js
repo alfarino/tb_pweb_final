@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
 const { requireLogin, requireAdmin } = require('../middleware/auth');
+const multer = require('multer');
+const path = require('path');
+
+const upload = multer({
+  dest: path.join(__dirname, '..', 'uploads/')
+});
 
 router.use(requireLogin, requireAdmin);
 
@@ -24,5 +30,11 @@ router.post('/users/deactivate/:id', adminController.deactivateUser);
 
 router.get('/database-items', adminController.getApprovedItems);
 router.post('/items/delete/:id', adminController.deleteItem);
+
+router.get('/database-transactions', adminController.getApprovedTransactions);
+router.post('/transactions/complete/:id', adminController.completeTransaction);
+router.post('/transactions/cancel/:id', adminController.cancelTransaction);
+
+router.post('/users/upload-csv', upload.single('csvFile'), adminController.uploadUserCSV);
 
 module.exports = router;
