@@ -429,21 +429,46 @@ exports.cancelTransaction = async (req, res) => {
 };
 
 
-  exports.updateAdminProfile = async (req, res) => {
-    try {
-      const { fullName, username } = req.body;
+exports.updateAdminProfile = async (req, res) => {
+  const userId = req.session.user.id;
+  const { username, fullName, email, phoneNumber, gender, password } = req.body;
 
-      await prisma.user.update({
-        where: { id: req.session.user.id },
-        data: { fullName, username }
-      });
+  const dataToUpdate = {};
 
-      req.session.user.fullName = fullName;
-      req.session.user.username = username;
-      req.session.success = "Profil admin berhasil diperbarui!";
-      res.redirect('/admin/profile');
-    } catch (err) {
-      console.error('Gagal update profil admin:', err);
-      res.status(500).send('Internal Server Error');
+  if (username) dataToUpdate.username = username;
+  if (fullName) dataToUpdate.fullName = fullName;
+  if (email) dataToUpdate.email = email;
+  if (phoneNumber) dataToUpdate.phoneNumber = phoneNumber;
+  if (password) dataToUpdate.password = await bcrypt.hash(password, 10);
+
+  if (req.file) {
+    // Hapus gambar lama jika ada
+    const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+    const oldImageUrl = existingUser.profileImage;
+    if (oldImageUrl) {
+      const publicId = getCloudinaryPublicId(oldImageUrl);
+      if (publicId) {
+        const { cloudinary } = require('../utils/cloudinary');
+        await cloudinary.uploader.destroy(publicId).catch(() => {});
+      }
     }
-  };
+    dataToUpdate.profileImage = req.file.path;
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...dataToUpdate,
+        updatedAt: new Date()
+      }
+    });
+
+    req.session.success = 'Profil berhasil diperbarui!';
+    res.redirect('/profile/main-profile');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Gagal memperbarui profil.');
+    res.redirect('/profile/edit-profile');
+  }
+};

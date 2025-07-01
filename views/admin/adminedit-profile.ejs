@@ -8,35 +8,52 @@
 <body class="bg-gray-100 min-h-screen">
   <%- include('adminnavbar') %>
 
-  <main class="max-w-xl mx-auto mt-10 bg-white p-6 rounded-lg shadow">
-    <h1 class="text-2xl font-bold mb-4 text-green-600">Edit Profil Admin</h1>
-    
-    <% if (success) { %>
-      <div class="bg-green-100 text-green-800 px-4 py-2 rounded mb-4">
-        <%= success %>
-      </div>
-    <% } %>
+    <!-- Main Content -->
+    <main class="flex-1 p-10 overflow-y-auto">
+      <div class="bg-white rounded-xl shadow-md p-10 max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Edit Profil</h1>
 
-    <form action="/admin/adminedit-profile" method="POST" class="space-y-4">
-      <div>
-        <label class="block font-semibold mb-1">Nama Lengkap</label>
-        <input type="text" name="fullName" value="<%= user.fullName %>" required
-               class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
-      </div>
+        <form class="grid grid-cols-1 md:grid-cols-3 gap-10" action="/profile/edit-profile" method="POST" enctype="multipart/form-data">
+          <!-- Input Fields -->
+          <div class="space-y-6 md:col-span-2">
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Username</label>
+              <input name="username" type="text" value="<%= user.username %>" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Nama Lengkap</label>
+              <input name="fullName" type="text" value="<%= user.fullName %>" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Email</label>
+              <input name="email" type="email" value="<%= user.email %>" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Nomor Telepon</label>
+              <input name="phoneNumber" type="tel" value="<%= user.phoneNumber || '' %>" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Password Baru (Opsional)</label>
+              <input name="password" type="password" placeholder="Kosongkan jika tidak ingin mengubah" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div class="pt-4">
+              <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                Simpan Perubahan
+              </button>
+            </div>
+          </div>
 
-      <div>
-        <label class="block font-semibold mb-1">Username</label>
-        <input type="text" name="username" value="<%= user.username %>" required
-               class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+          <!-- Gambar Profil -->
+          <div class="flex flex-col items-center space-y-4">
+            <% if (user.profileImage) { %>
+              <img src="<%= user.profileImage %>" alt="Foto Profil" class="w-32 h-32 rounded-full object-cover" />
+            <% } else { %>
+              <div class="w-32 h-32 bg-gray-300 rounded-full"></div>
+            <% } %>
+            <input type="file" name="profileImage" class="text-sm text-gray-600" />
+          </div>
+        </form>
       </div>
-
-      <div class="text-right">
-        <button type="submit"
-                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
-          Simpan Perubahan
-        </button>
-      </div>
-    </form>
-  </main>
+    </main>
 </body>
 </html>
